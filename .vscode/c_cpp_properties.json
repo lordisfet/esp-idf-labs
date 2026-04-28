@@ -148,6 +148,7 @@
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/ulp/ulp_common/include/esp32s3",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/usb/include",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/wifi_provisioning/include",
+                "p:/Embedded/esp-idf-labs/lib/myButton",
                 ""
             ],
             "browse": {
@@ -293,6 +294,7 @@
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/ulp/ulp_common/include/esp32s3",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/usb/include",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/wifi_provisioning/include",
+                    "p:/Embedded/esp-idf-labs/lib/myButton",
                     ""
                 ]
             },
