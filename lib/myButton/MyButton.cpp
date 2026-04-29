@@ -1,6 +1,6 @@
-#include "myButton.h"
+#include "MyButton.h"
 
-esp_err_t myButton::init()
+esp_err_t MyButton::init()
 {
     const gpio_config_t configButton =
         {
@@ -21,7 +21,7 @@ esp_err_t myButton::init()
     return ESP_OK;
 }
 
-enum ButtonState myButton::button_update()
+void MyButton::button_update()
 {
     enum ButtonState stateToReturn = _internallState;
     int currentLevel = gpio_get_level(_pin);
@@ -66,6 +66,4 @@ enum ButtonState myButton::button_update()
     default:
         break;
     }
-
-    return stateToReturn;
 }

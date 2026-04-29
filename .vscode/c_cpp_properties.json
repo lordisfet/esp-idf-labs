@@ -10,6 +10,7 @@
             "includePath": [
                 "p:/Embedded/esp-idf-labs/include",
                 "p:/Embedded/esp-idf-labs/src",
+                "p:/Embedded/esp-idf-labs/lib/myButton",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/xtensa/include",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/xtensa/esp32s3/include",
                 "P:/Embedded/esp-idf-labs/.pio/build/esp32-s3-devkitc-1/config",
@@ -148,7 +149,6 @@
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/ulp/ulp_common/include/esp32s3",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/usb/include",
                 "C:/Users/maxas/.platformio/packages/framework-espidf/components/wifi_provisioning/include",
-                "p:/Embedded/esp-idf-labs/lib/myButton",
                 ""
             ],
             "browse": {
@@ -156,6 +156,7 @@
                 "path": [
                     "p:/Embedded/esp-idf-labs/include",
                     "p:/Embedded/esp-idf-labs/src",
+                    "p:/Embedded/esp-idf-labs/lib/myButton",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/xtensa/include",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/xtensa/esp32s3/include",
                     "P:/Embedded/esp-idf-labs/.pio/build/esp32-s3-devkitc-1/config",
@@ -294,7 +295,6 @@
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/ulp/ulp_common/include/esp32s3",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/usb/include",
                     "C:/Users/maxas/.platformio/packages/framework-espidf/components/wifi_provisioning/include",
-                    "p:/Embedded/esp-idf-labs/lib/myButton",
                     ""
                 ]
             },

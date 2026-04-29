@@ -1,10 +1,10 @@
+#pragma once
+
 #include "stdio.h"
 #include "freertos/FreeRTOS.h"
 #include "esp_timer.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
-
-#define PIN_BUTTON 4
 
 enum ButtonState
 {
@@ -27,15 +27,16 @@ enum ButtonPullMode
     NO_PULL = 2,
 };
 
-class myButton
+class MyButton
 {
 private:
     static constexpr uint16_t _DEBOUNCE_TIME_US = 50000;
 
+    gpio_num_t _pin;
+
     const char *_TAG_BUTTON;
     const enum ButtonActiveLevel _ACTIVE_LEVEL;
     const enum ButtonPullMode _PULL_MODE;
-    gpio_num_t _pin;
 
     void (*_onPress)(void);
 
@@ -44,14 +45,14 @@ private:
     uint64_t _lastlevelSwitchTime;
 
 public:
-    myButton(const char *tag, gpio_num_t pin, const enum ButtonActiveLevel activeLevel = ACTIVE_LOW, const enum ButtonPullMode pullMode = PULL_UP,
-             void (*onPress)(void) = nullptr)
-        : _TAG_BUTTON(tag), _pin(pin), _ACTIVE_LEVEL(activeLevel), _PULL_MODE(pullMode), _onPress(onPress)
+    MyButton(gpio_num_t pin, const char *tag, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW, const enum ButtonPullMode PULL_MODE = PULL_UP,
+             void (*onPress)() = nullptr)
+        : _pin(pin), _TAG_BUTTON(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
     {
         _internallState = IDLE;
         _lastlevelSwitchTime = 0;
     };
 
     esp_err_t init();
-    enum ButtonState button_update();
+    void button_update();
 };
