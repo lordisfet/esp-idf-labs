@@ -1,7 +1,5 @@
 #include "MyButton.h"
 
-static const char *_TAG_BUTTON = "MyButton";
-
 esp_err_t MyButton::init()
 {
     const gpio_config_t configButton =
@@ -25,7 +23,6 @@ esp_err_t MyButton::init()
 
 void MyButton::update()
 {
-    enum ButtonState stateToReturn = _internallState;
     int currentLevel = gpio_get_level(_pin);
     uint64_t currentTime = esp_timer_get_time();
 
@@ -54,16 +51,17 @@ void MyButton::update()
     case PRESSED:
         if (_onPress != nullptr)
         {
-            _onPress();
+            _onPress(_argForPress);
+            ESP_LOGI(_TAG, "Button on pin %d pressed", _pin);
         }
 
         _lastlevel = currentLevel;
         _internallState = IDLE;
         break;
     case RELEASED:
-
         _lastlevel = currentLevel;
         _internallState = IDLE;
+        ESP_LOGI(_TAG, "Button on pin %d released", _pin);
         break;
     default:
         break;

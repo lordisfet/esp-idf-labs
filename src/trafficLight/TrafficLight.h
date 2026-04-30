@@ -9,9 +9,9 @@
 
 #define DEFAULT_TAG_TRAFFIC_LIGHT "TRAFFIC_LIGHT"
 
-enum TrafficLightInternalState
+enum class TrafficLightInternalState
 {
-    IDLE,
+    CALM,
     RED,
     RED_AND_YELLOW,
     YELLOW,
@@ -29,15 +29,17 @@ private:
     State _state;
 
 public:
-    TrafficLight(const int ledCount, Led *leds = nullptr, const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT, TrafficLightInternalState internalState = IDLE, State state = State::OFF)
+    TrafficLight(const int ledCount, Led *leds = nullptr, const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT,
+                 TrafficLightInternalState internalState = TrafficLightInternalState::CALM, State state = State::OFF)
         : _ledCount(ledCount), _leds(leds), _TAG(tag), _internalState(internalState), _state(state) {};
 
-    TrafficLightInternalState getState() const { return _internalState; }
+    State getState() const { return _state; }
 
     void update();
-    inline void switchState()
+    static void switchState(void *trafficLight)
     {
-        _state = !_state;
-        ESP_LOGI(_TAG, "Traffic light state switched to: %s", _state == State::ON ? "ON" : "OFF");
+        TrafficLight *tl = static_cast<TrafficLight *>(trafficLight);
+        tl->_state = !tl->_state;
+        ESP_LOGI(tl->_TAG, "Traffic light state switched to: %s", tl->_state == State::ON ? "ON" : "OFF");
     }
 };

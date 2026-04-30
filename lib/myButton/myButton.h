@@ -39,18 +39,19 @@ private:
     const enum ButtonActiveLevel _ACTIVE_LEVEL;
     const enum ButtonPullMode _PULL_MODE;
 
-    void (*_onPress)(void);
+    void (*_onPress)(void *);
+    void *_argForPress;
 
-    enum ButtonState _internallState;
+    ButtonState _internallState;
     int _lastlevel;
     uint64_t _lastlevelSwitchTime;
 
 public:
     MyButton(gpio_num_t pin, const char *tag = DEFAULT_TAG_BUTTON, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW,
-             const enum ButtonPullMode PULL_MODE = PULL_UP, void (*onPress)() = nullptr)
-        : _pin(pin), _TAG(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
+             const enum ButtonPullMode PULL_MODE = PULL_UP, void (*onPress)(void *) = nullptr, void *argForPress = nullptr)
+        : _pin(pin), _TAG(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress), _argForPress(argForPress)
     {
-        _internallState = IDLE;
+        _internallState = ButtonState::IDLE;
         _lastlevelSwitchTime = 0;
     };
 

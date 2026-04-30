@@ -1,11 +1,12 @@
 #include "TrafficLight.h"
 
+using enum TrafficLightInternalState;
+
 void TrafficLight::update()
 {
     switch (_internalState)
     {
-    case IDLE:
-
+    case CALM:
         break;
     case RED:
         break;
