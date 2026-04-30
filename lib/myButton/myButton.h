@@ -5,6 +5,8 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+#define DEFAULT_TAG_BUTTON "BUTTON"
+
 enum ButtonState
 {
     IDLE,
@@ -33,7 +35,7 @@ private:
 
     gpio_num_t _pin;
 
-    const char *_TAG_BUTTON;
+    const char *_TAG;
     const enum ButtonActiveLevel _ACTIVE_LEVEL;
     const enum ButtonPullMode _PULL_MODE;
 
@@ -44,9 +46,9 @@ private:
     uint64_t _lastlevelSwitchTime;
 
 public:
-    MyButton(gpio_num_t pin, const char *tag, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW, const enum ButtonPullMode PULL_MODE = PULL_UP,
-             void (*onPress)() = nullptr)
-        : _pin(pin), _TAG_BUTTON(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
+    MyButton(gpio_num_t pin, const char *tag = DEFAULT_TAG_BUTTON, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW,
+             const enum ButtonPullMode PULL_MODE = PULL_UP, void (*onPress)() = nullptr)
+        : _pin(pin), _TAG(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
     {
         _internallState = IDLE;
         _lastlevelSwitchTime = 0;

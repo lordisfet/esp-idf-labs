@@ -5,6 +5,8 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+#define DEFAULT_TAG_LED "LED"
+
 enum LedState
 {
     OFF,
@@ -14,11 +16,14 @@ enum LedState
 class Led
 {
 private:
+    const char *_TAG;
     gpio_num_t _pin;
     enum LedState _state;
 
 public:
-    Led(gpio_num_t pin, LedState state) : _pin(pin), _state(state) {};
+    Led() {};
+    Led(const char *tag = DEFAULT_TAG_LED, gpio_num_t pin, LedState state)
+        : _TAG(tag), _pin(pin), _state(state) {};
 
     esp_err_t init();
     void blinking();
