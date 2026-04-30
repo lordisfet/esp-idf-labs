@@ -1,5 +1,7 @@
 #include "MyButton.h"
 
+static const char *_TAG_BUTTON = "MyButton";
+
 esp_err_t MyButton::init()
 {
     const gpio_config_t configButton =
@@ -13,7 +15,7 @@ esp_err_t MyButton::init()
     esp_err_t err = gpio_config(&configButton);
     if (err != ESP_OK)
     {
-        ESP_LOGE(_TAG_BUTTON, "Failed to configure GPIO: %d", err);
+        ESP_LOGE(_TAG, "Failed to configure button GPIO: %s", esp_err_to_name(err));
         return err;
     }
 
@@ -21,7 +23,7 @@ esp_err_t MyButton::init()
     return ESP_OK;
 }
 
-void MyButton::button_update()
+void MyButton::update()
 {
     enum ButtonState stateToReturn = _internallState;
     int currentLevel = gpio_get_level(_pin);

@@ -26,7 +26,7 @@ extern "C" void app_main()
     button.init();
     while (1)
     {
-        button.button_update();
+        button.update();
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }

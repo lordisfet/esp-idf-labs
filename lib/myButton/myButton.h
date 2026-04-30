@@ -55,5 +55,5 @@ public:
     };
 
     esp_err_t init();
-    void button_update();
+    void update();
 };

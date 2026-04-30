@@ -5,6 +5,8 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+#include "State.h"
+
 #define DEFAULT_TAG_LED "LED"
 
 enum LedState
