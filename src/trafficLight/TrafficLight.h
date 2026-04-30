@@ -29,8 +29,8 @@ private:
     State _state;
 
 public:
-    TrafficLight(const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT, const int ledCount, Led *leds = nullptr, TrafficLightInternalState internalState = IDLE)
-        : _TAG(tag), _ledCount(ledCount), _leds(leds), _internalState(internalState) {};
+    TrafficLight(const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT, const int ledCount, Led *leds = nullptr, TrafficLightInternalState internalState = IDLE, State state = State::OFF)
+        : _TAG(tag), _ledCount(ledCount), _leds(leds), _internalState(internalState), _state(state) {};
 
     TrafficLightInternalState getState() const { return _internalState; }
 

@@ -22,7 +22,7 @@ void switchTrafficLight()
 
 extern "C" void app_main()
 {
-    MyButton button(PIN_BUTTON, TAG_BUTTON, ACTIVE_LOW, PULL_UP, switchTrafficLight);
+    MyButton button(TAG_BUTTON, PIN_BUTTON, ACTIVE_LOW, PULL_UP, switchTrafficLight);
     button.init();
     while (1)
     {

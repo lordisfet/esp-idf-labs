@@ -5,6 +5,7 @@ void TrafficLight::update()
     switch (_internalState)
     {
     case IDLE:
+
         break;
     case RED:
         break;

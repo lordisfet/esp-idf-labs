@@ -1,3 +1,5 @@
+#include "esp_timer.h"
+
 #include "Led.h"
 
 esp_err_t Led::init()
@@ -20,9 +22,21 @@ esp_err_t Led::init()
     return ESP_OK;
 }
 
-void Led::blinking()
+void Led::turnOn()
 {
-    _state = !_state;
-    gpio_set_level(_pin, _state == State::ON ? 1 : 0);
-    ESP_LOGI(_TAG, "LED on pin %d is now %s", _pin, _state == State::ON ? "ON" : "OFF");
+    _state = State::ON;
+    gpio_set_level(_pin, 1);
+    ESP_LOGI(_TAG, "LED on pin %d turned ON", _pin);
+};
+
+void Led::turnOff()
+{
+    _state = State::OFF;
+    gpio_set_level(_pin, 0);
+    ESP_LOGI(_TAG, "LED on pin %d turned OFF", _pin);
+};
+
+void Led::blink(ulong interval_ms)
+{
+    turnOn();
 }
