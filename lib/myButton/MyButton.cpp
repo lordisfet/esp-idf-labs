@@ -15,7 +15,7 @@ esp_err_t MyButton::init()
     esp_err_t err = gpio_config(&configButton);
     if (err != ESP_OK)
     {
-        ESP_LOGE(_TAG, "Failed to configure button GPIO: %s", esp_err_to_name(err));
+        ESP_LOGE(_TAG, "Failed to configure GPIO pin %d: %s", _pin, esp_err_to_name(err));
         return err;
     }
 
