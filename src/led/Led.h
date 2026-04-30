@@ -12,14 +12,13 @@
 class Led
 {
 private:
-    const char *_TAG;
     gpio_num_t _pin;
+    const char *_TAG;
     State _state;
 
 public:
-    Led() {};
-    Led(const char *tag = DEFAULT_TAG_LED, gpio_num_t pin, State state = State::OFF)
-        : _TAG(tag), _pin(pin), _state(state) {};
+    Led(gpio_num_t pin, const char *tag = DEFAULT_TAG_LED, State state = State::OFF)
+        : _pin(pin), _TAG(tag), _state(state) {};
 
     esp_err_t init();
     void turnOn();

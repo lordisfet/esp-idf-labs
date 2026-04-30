@@ -22,15 +22,15 @@ enum TrafficLightInternalState
 class TrafficLight
 {
 private:
-    const char *_TAG;
     const int _ledCount;
     Led *_leds;
+    const char *_TAG;
     TrafficLightInternalState _internalState;
     State _state;
 
 public:
-    TrafficLight(const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT, const int ledCount, Led *leds = nullptr, TrafficLightInternalState internalState = IDLE, State state = State::OFF)
-        : _TAG(tag), _ledCount(ledCount), _leds(leds), _internalState(internalState), _state(state) {};
+    TrafficLight(const int ledCount, Led *leds = nullptr, const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT, TrafficLightInternalState internalState = IDLE, State state = State::OFF)
+        : _ledCount(ledCount), _leds(leds), _TAG(tag), _internalState(internalState), _state(state) {};
 
     TrafficLightInternalState getState() const { return _internalState; }
 

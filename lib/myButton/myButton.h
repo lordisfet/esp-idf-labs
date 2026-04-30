@@ -33,8 +33,9 @@ class MyButton
 private:
     static constexpr uint16_t _DEBOUNCE_TIME_US = 50000;
 
-    const char *_TAG;
     gpio_num_t _pin;
+
+    const char *_TAG;
     const enum ButtonActiveLevel _ACTIVE_LEVEL;
     const enum ButtonPullMode _PULL_MODE;
 
@@ -45,9 +46,9 @@ private:
     uint64_t _lastlevelSwitchTime;
 
 public:
-    MyButton(const char *tag = DEFAULT_TAG_BUTTON, gpio_num_t pin, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW,
+    MyButton(gpio_num_t pin, const char *tag = DEFAULT_TAG_BUTTON, const enum ButtonActiveLevel ACTIVE_LEVEL = ACTIVE_LOW,
              const enum ButtonPullMode PULL_MODE = PULL_UP, void (*onPress)() = nullptr)
-        : _TAG(tag), _pin(pin), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
+        : _pin(pin), _TAG(tag), _ACTIVE_LEVEL(ACTIVE_LEVEL), _PULL_MODE(PULL_MODE), _onPress(onPress)
     {
         _internallState = IDLE;
         _lastlevelSwitchTime = 0;
