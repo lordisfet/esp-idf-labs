@@ -7,9 +7,6 @@
 
 #include "led/Led.h"
 
-using enum TrafficLightInternalState;
-using enum State;
-
 #define DEFAULT_TAG_TRAFFIC_LIGHT "TRAFFIC_LIGHT"
 
 enum class TrafficLightInternalState
@@ -34,7 +31,7 @@ private:
 
 public:
     TrafficLight(const int ledCount, Led *leds = nullptr, const char *tag = DEFAULT_TAG_TRAFFIC_LIGHT,
-                 TrafficLightInternalState internalState = CALM, State state = OFF)
+                 TrafficLightInternalState internalState = TrafficLightInternalState::CALM, State state = State::OFF)
         : _ledCount(ledCount), _leds(leds), _TAG(tag), _internalState(internalState), _state(state) {};
 
     State getState() const { return _state; }
@@ -44,17 +41,17 @@ public:
     {
         TrafficLight *tl = static_cast<TrafficLight *>(trafficLight);
         tl->_state = !tl->_state;
-        if (tl->_state == ON)
+        if (tl->_state == State::ON)
         {
-            tl->_internalState = CALM;
+            tl->_internalState = TrafficLightInternalState::CALM;
             tl->_lastSwitchTime = esp_timer_get_time();
         }
-        else if (tl->_state == OFF)
+        else if (tl->_state == State::OFF)
         {
             tl->turnOffAllLeds();
         }
 
-        ESP_LOGI(tl->_TAG, "Traffic light state switched to: %s", tl->_state == ON ? "ON" : "OFF");
+        ESP_LOGI(tl->_TAG, "Traffic light state switched to: %s", tl->_state == State::ON ? "ON" : "OFF");
     }
 
     void turnOffAllLeds()

@@ -47,10 +47,11 @@ void MyButton::update()
                 _internallState = RELEASED;
             }
         }
-        else
+        else if (currentLevel == _lastlevel)
         {
             _internallState = IDLE;
         }
+
         break;
     case PRESSED:
         if (_onPress != nullptr)
