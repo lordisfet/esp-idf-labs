@@ -15,6 +15,7 @@ private:
     gpio_num_t _pin;
     const char *_TAG;
     volatile State _state;
+    uint8_t _blinkCounter = 0;
 
     esp_timer_handle_t _blinkTimer;
 
@@ -23,6 +24,9 @@ public:
         : _pin(pin), _TAG(tag), _state(state) {};
 
     gpio_num_t getPin() const { return _pin; }
+    State getState() const { return _state; }
+    uint8_t getBlinkCounter() const { return _blinkCounter; }
+    void setBlinkCounter(uint8_t count) { _blinkCounter = count; }
 
     esp_err_t init();
     void blinkOn();

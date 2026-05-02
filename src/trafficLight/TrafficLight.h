@@ -4,6 +4,7 @@
 #include "esp_timer.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_task_wdt.h"
 
 #include "led/Led.h"
 
@@ -37,28 +38,6 @@ public:
     State getState() const { return _state; }
 
     void update();
-    static void switchState(void *trafficLight)
-    {
-        TrafficLight *tl = static_cast<TrafficLight *>(trafficLight);
-        tl->_state = !tl->_state;
-        if (tl->_state == State::ON)
-        {
-            tl->_internalState = TrafficLightInternalState::CALM;
-            tl->_lastSwitchTime = esp_timer_get_time();
-        }
-        else if (tl->_state == State::OFF)
-        {
-            tl->turnOffAllLeds();
-        }
-
-        ESP_LOGI(tl->_TAG, "Traffic light state switched to: %s", tl->_state == State::ON ? "ON" : "OFF");
-    }
-
-    void turnOffAllLeds()
-    {
-        for (int i = 0; i < _ledCount; i++)
-        {
-            _leds[i].blinkOff();
-        }
-    }
+    static void switchState(void *trafficLight);
+    void turnOffAllLeds();
 };
