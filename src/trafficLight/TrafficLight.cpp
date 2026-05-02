@@ -11,14 +11,11 @@ void TrafficLight::update()
     switch (_internalState)
     {
     case CALM:
-        if (currentTime - lastSwitchTime >= CALM_DURATION_MS)
-        {
-            turnOffAllLeds();
-            _internalState = RED;
-            lastSwitchTime = currentTime;
-            _leds[0].blinkOn();
-            ESP_LOGI(_TAG, "Traffic light switched to RED");
-        }
+        turnOffAllLeds();
+        _internalState = RED;
+        lastSwitchTime = currentTime;
+        _leds[0].blinkOn();
+        ESP_LOGI(_TAG, "Traffic light switched to RED");
 
         break;
     case RED:

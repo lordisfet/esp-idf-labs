@@ -39,7 +39,7 @@ extern "C" void app_main()
         }
     }
 
-    TrafficLight trafficLight(ledcount, const_cast<Led *>(leds));
+    TrafficLight trafficLight(ledcount, leds);
 
     MyButton button(PIN_BUTTON, TAG_BUTTON, ACTIVE_LOW, PULL_UP, TrafficLight::switchState, &trafficLight);
     button.init();
