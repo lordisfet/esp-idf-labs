@@ -19,18 +19,25 @@ gpio_num_t PIN_RED_LED = GPIO_NUM_1;
 const char *TAG_RED_LED = "RED_LED";
 gpio_num_t PIN_YELLOW_LED = GPIO_NUM_40;
 const char *TAG_YELLOW_LED = "YELLOW_LED";
-gpio_num_t PIN_GREEN_LED = GPIO_NUM_37;
+gpio_num_t PIN_GREEN_LED = GPIO_NUM_36;
 const char *TAG_GREEN_LED = "GREEN_LED";
 
 volatile bool trafficLightLevel = false;
 
 extern "C" void app_main()
 {
-    Led const leds[] = {
+    Led leds[] = {
         Led(PIN_RED_LED, TAG_RED_LED),
         Led(PIN_YELLOW_LED, TAG_YELLOW_LED),
         Led(PIN_GREEN_LED, TAG_GREEN_LED),
     };
+    for (int i = 0; i < ledcount; i++)
+    {
+        if (leds[i].init() != ESP_OK)
+        {
+            ESP_LOGE("MAIN", "Failed to initialize LED on pin %d", leds[i].getPin());
+        }
+    }
 
     TrafficLight trafficLight(ledcount, const_cast<Led *>(leds));
 

@@ -22,7 +22,9 @@ public:
     Led(gpio_num_t pin, const char *tag = DEFAULT_TAG_LED, State state = State::OFF)
         : _pin(pin), _TAG(tag), _state(state) {};
 
+    gpio_num_t getPin() const { return _pin; }
+
     esp_err_t init();
-    void blinkOn(ulong interval_ms);
-    static void blinkOff(void *arg);
+    void blinkOn();
+    void blinkOff();
 };

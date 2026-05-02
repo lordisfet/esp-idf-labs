@@ -42,4 +42,12 @@ public:
         tl->_state = !tl->_state;
         ESP_LOGI(tl->_TAG, "Traffic light state switched to: %s", tl->_state == State::ON ? "ON" : "OFF");
     }
+
+    void turnOffAllLeds()
+    {
+        for (int i = 0; i < _ledCount; i++)
+        {
+            _leds[i].blinkOff();
+        }
+    }
 };
