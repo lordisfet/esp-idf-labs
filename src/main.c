@@ -4,114 +4,44 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 #include "esp_timer.h"
-#include <time.h>
-#include "esp_task_wdt.h"
 
-#define PIN_BUTTON 4
-#define PIN_BUTTON_MASK 1ULL << PIN_BUTTON
-#define DEBOUNCE_TIME_US 50000
+static const char *TAG_LAMP = "BLINK";
+const int LAMP_CONTROL_PIN = 4;
+const unsigned long timeON = 1000000;
+const unsigned long timeOFF = 5000000;
 
-const char *TAG_BUTTON = "BUTTON";
-volatile bool isClickedWithoutDebounce = false;
+bool lampState = false;
+esp_timer_handle_t lamp_timer_handler;
 
-enum ButtonState
+void switchLampState()
 {
-    IDLE,
-    RELEASED,
-    DEBOUNCE,
-    PRESSED,
-};
+    lampState = !lampState;
+    gpio_set_level(LAMP_CONTROL_PIN, lampState);
 
-void IRAM_ATTR button_intterapt(void *arg)
-{
-    volatile int *ptr = arg;
-    (*ptr)++;
-    isClickedWithoutDebounce = true;
-}
-
-enum ButtonState button_update(volatile int *clickCount)
-{
-    static enum ButtonState internallState = RELEASED;
-    static ulong lastLevelSwitchTime;
-    static int lastlevel = 1;
-
-    enum ButtonState stateToReturn = internallState;
-    int currentLevel = gpio_get_level(PIN_BUTTON);
-    ulong currentTime = esp_timer_get_time();
-
-    switch (internallState)
+    if (lampState)
     {
-    case IDLE:
-        if (currentLevel != lastlevel)
-        {
-            lastLevelSwitchTime = currentTime;
-            internallState = DEBOUNCE;
-        }
-        break;
-    case DEBOUNCE:
-        if (currentTime - lastLevelSwitchTime >= DEBOUNCE_TIME_US && currentLevel != lastlevel)
-        {
-            if (currentLevel == 0)
-            {
-                internallState = PRESSED;
-            }
-            if (currentLevel == 1)
-            {
-                internallState = RELEASED;
-            }
-        }
-        break;
-    case PRESSED:
-        ++(*clickCount);
-        lastlevel = currentLevel;
-        internallState = IDLE;
-        break;
-    case RELEASED:
-        // обробка відпусканян для завдання не потрібна, але додаванян RELEASED описує всі стани кнопки
-        // бо для обробки всіх станів кнопки потрібно обробляти і відпускання
-        // Потім цю функцію можна додати в структуру та передавати вказівники на функції як формальний параметр,
-        // що будуть виконуватися при натисканні/відпусканні кнопки
-        lastlevel = currentLevel;
-        internallState = IDLE;
-        break;
-    default:
-        break;
+        ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeON));
+    }
+    else
+    {
+        ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeOFF));
     }
 
-    return stateToReturn;
+    ESP_LOGI(TAG_LAMP, "Lamp state changed to %d", lampState);
 }
 
 void app_main()
 {
-    gpio_install_isr_service(0);
-    volatile int countClickWithoutDebounce = 0;
-    volatile int countClickWithFSM = 0;
+    gpio_reset_pin(LAMP_CONTROL_PIN);
+    gpio_set_direction(LAMP_CONTROL_PIN, GPIO_MODE_OUTPUT);
+    gpio_set_level(LAMP_CONTROL_PIN, lampState);
 
-    const gpio_config_t configButton =
-        {
-            .pin_bit_mask = PIN_BUTTON_MASK,
-            .mode = GPIO_MODE_INPUT,
-            .pull_down_en = false,
-            .pull_up_en = true,
-            .intr_type = GPIO_INTR_NEGEDGE};
+    const esp_timer_create_args_t lamp_timer_args = {
+        .callback = switchLampState,
+        .name = "lamp_timer",
+    };
 
-    ESP_ERROR_CHECK(gpio_config(&configButton));
-    ESP_ERROR_CHECK(gpio_isr_handler_add(PIN_BUTTON, button_intterapt, (void *)&countClickWithoutDebounce));
+    ESP_ERROR_CHECK(esp_timer_create(&lamp_timer_args, &lamp_timer_handler));
 
-    while (1)
-    {
-        if (isClickedWithoutDebounce)
-        {
-            ESP_LOGI(TAG_BUTTON, "Button clicked without debounce. Count: %d", countClickWithoutDebounce);
-            isClickedWithoutDebounce = false;
-        }
-        if (button_update(&countClickWithFSM) == PRESSED)
-        {
-            ESP_LOGI(TAG_BUTTON, "Button clicked with FSM. Count: %d", countClickWithFSM);
-        }
-
-        // Знайшов цей костильний спосіб для скидання wdt, бо поки не розумію сам принцип як реалізований wdt
-        // та як ним керувати, але якщо його не скинути контролер просто перезавантажуэться
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
+    ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeOFF));
 }
