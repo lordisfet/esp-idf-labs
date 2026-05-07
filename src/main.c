@@ -3,45 +3,36 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "esp_adc/adc_oneshot.h"
+#include "soc/gpio_struct.h"
+#include "soc/adc_channel.h"
 
-static const char *TAG_LAMP = "BLINK";
-const int LAMP_CONTROL_PIN = 4;
-const unsigned long timeON = 1000000;
-const unsigned long timeOFF = 5000000;
-
-bool lampState = false;
-esp_timer_handle_t lamp_timer_handler;
-
-void switchLampState()
-{
-    lampState = !lampState;
-    gpio_set_level(LAMP_CONTROL_PIN, lampState);
-
-    if (lampState)
-    {
-        ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeON));
-    }
-    else
-    {
-        ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeOFF));
-    }
-
-    ESP_LOGI(TAG_LAMP, "Lamp state changed to %d", lampState);
-}
+#define GPIO_ADC GPIO_NUM_4
+#define ADC_CLK_SRC_DEFAULT 0
+#define TAG "ADC_ONESHOT_EXAMPLE"
+#define ADC1_READ_DELAY_MS 1000
 
 void app_main()
 {
-    gpio_reset_pin(LAMP_CONTROL_PIN);
-    gpio_set_direction(LAMP_CONTROL_PIN, GPIO_MODE_OUTPUT);
-    gpio_set_level(LAMP_CONTROL_PIN, lampState);
+    adc_oneshot_unit_handle_t adc1_handle;
+    adc_oneshot_unit_init_cfg_t adc1_config = {
+        .unit_id = ADC_UNIT_1,
+        .clk_src = ADC_CLK_SRC_DEFAULT,
+        .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&adc1_config, &adc1_handle));
 
-    const esp_timer_create_args_t lamp_timer_args = {
-        .callback = switchLampState,
-        .name = "lamp_timer",
+    adc_oneshot_chan_cfg_t adc1_chan_cfg = {
+        .bitwidth = ADC_BITWIDTH_DEFAULT,
     };
 
-    ESP_ERROR_CHECK(esp_timer_create(&lamp_timer_args, &lamp_timer_handler));
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, ADC1_GPIO4_CHANNEL, &adc1_chan_cfg));
 
-    ESP_ERROR_CHECK(esp_timer_start_once(lamp_timer_handler, timeOFF));
+    while (1)
+    {
+        int adc_raw;
+        ESP_ERROR_CHECK(adc_oneshot_read(adc1_handle, ADC1_GPIO4_CHANNEL, &adc_raw));
+        ESP_LOGI(TAG, "ADC Raw Data: %d", adc_raw);
+        vTaskDelay(pdMS_TO_TICKS(ADC1_READ_DELAY_MS));
+    }
 }
