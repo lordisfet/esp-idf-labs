@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <math.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -8,7 +10,6 @@
 #include "soc/adc_channel.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
-#include <math.h>
 
 #define GPIO_ADC GPIO_NUM_4
 #define ADC_CLK_SRC_DEFAULT 0
