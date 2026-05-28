@@ -36,12 +36,12 @@ bool led_update(int voltage_mv, gpio_num_t led_gpio, int &smoothed_voltage_mv)
     sma.add(voltage_mv);
     smoothed_voltage_mv = static_cast<int>(sma.get_average());
 
-    if (voltage_mv > threshold_mv)
+    if (smoothed_voltage_mv > threshold_mv)
     {
         gpio_set_level(led_gpio, 0);
         return false;
     }
-    else if (voltage_mv < threshold_mv - hysteresis_mv)
+    else if (smoothed_voltage_mv < threshold_mv - hysteresis_mv)
     {
         gpio_set_level(led_gpio, 1);
     }
