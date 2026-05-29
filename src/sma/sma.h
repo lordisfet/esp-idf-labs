@@ -35,20 +35,16 @@ public:
     /**
      * @brief Get the average of the values in the buffer
      *
-     * @return The average of the values in the buffer. If the buffer is not yet filled, returns -1.0.
+     * @return The average of the values in the buffer.
      */
     double get_average() const
     {
-        if (is_buffer_filled)
+        int sum = 0;
+        for (size_t i = 0; i < WINDOW_SIZE; ++i)
         {
-            int sum = 0;
-            for (size_t i = 0; i < WINDOW_SIZE; ++i)
-            {
-                sum += _buffer[i];
-            }
-            return static_cast<double>(sum) / WINDOW_SIZE;
+            sum += _buffer[i];
         }
 
-        return -1.0;
+        return static_cast<double>(sum) / (is_buffer_filled ? WINDOW_SIZE : _index + 1);
     }
 };
