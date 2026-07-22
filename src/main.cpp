@@ -14,7 +14,6 @@
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 #include "esp_adc/adc_continuous.h"
-#include "SMA.h"
 #include "Button.h"
 
 #define TAG_BUTTON "BUTTON"
