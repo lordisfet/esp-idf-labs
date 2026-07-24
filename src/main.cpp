@@ -18,7 +18,7 @@
 #include "esp_adc/adc_continuous.h"
 #include "Button.h"
 #include ".\music_player\pwm\PWM.h"
-#include ".\music_player\melody\note\MelodyNote.h"
+#include ".\music_player\note\MelodyNote.h"
 #include ".\music_player\buzzer\Buzzer.h"
 
 #define TAG_BUTTON "BUTTON"

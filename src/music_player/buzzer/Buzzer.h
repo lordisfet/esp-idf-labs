@@ -4,7 +4,7 @@
 #include <etl/vector.h>
 #include <etl/string.h>
 
-#include "../melody/note/MelodyNote.h"
+#include "../note/MelodyNote.h"
 #include "../pwm/PWM.h"
 #include "esp_log.h"
 #include "BuzzetState.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdio.h>
+
 #include "./Note.h"
 
 class MelodyNote

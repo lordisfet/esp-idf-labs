@@ -1,22 +1,25 @@
 #include "PWM.h"
 
 PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel, 
-        uint32_t freq, uint32_t duty) : 
-        _pin(pin), _timer_num(timer_num), _channel(channel), _freq(freq), _duty(duty)
+        uint32_t freq, uint32_t duty, ledc_intr_type_t intr_type, 
+        ledc_mode_t speed_mode, ledc_timer_bit_t duty_res, ledc_clk_cfg_t clk_cfg) : 
+        _pin(pin), _timer_num(timer_num), _channel(channel), 
+        _freq(freq), _duty(duty), _intr_type(intr_type), _speed_mode(speed_mode), 
+        _duty_res(duty_res), _clk_cfg(clk_cfg)
 {
     ledc_timer_config_t pwm_timer_config = {
-        .speed_mode = LEDC_LOW_SPEED_MODE,
-        .duty_resolution = LEDC_TIMER_12_BIT,
+        .speed_mode = _speed_mode,
+        .duty_resolution = _duty_res,
         .timer_num = _timer_num,
         .freq_hz = _freq,
-        .clk_cfg = LEDC_AUTO_CLK,
+        .clk_cfg = _clk_cfg,
     };
 
     ledc_channel_config_t buzzer_channel_config = {
         .gpio_num = _pin,
-        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .speed_mode = _speed_mode,
         .channel = _channel,
-        .intr_type = LEDC_INTR_DISABLE,
+        .intr_type = _intr_type,
         .timer_sel = _timer_num,
         .duty = _duty,
         .hpoint = 0,
@@ -30,11 +33,11 @@ PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel,
 
 void PWM::updateFrequency(uint32_t new_freq) {
     _freq = new_freq;
-    ledc_set_freq(LEDC_LOW_SPEED_MODE, _timer_num, _freq);
+    ledc_set_freq(_speed_mode, _timer_num, _freq);
 }
 
 void PWM::updateDuty(uint32_t new_duty) {
     _duty = new_duty;
-    ledc_set_duty(LEDC_LOW_SPEED_MODE, _channel, _duty);
-    ledc_update_duty(LEDC_LOW_SPEED_MODE, _channel);
+    ledc_set_duty(_speed_mode, _channel, _duty);
+    ledc_update_duty(_speed_mode, _channel);
 }
