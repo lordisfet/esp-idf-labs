@@ -27,11 +27,7 @@
 
 #define TAG_BUZZER "BUZZER"
 #define GPIO_BUZZER GPIO_NUM_21
-#define PWM_BUZZER_COEF 2./5
 
-#define PWM_FREQUENCY 2000
-#define PWM_MAX_DUTY ADC_MAX_RAW
-#define PWM_DUTY_CYCLE (uint16_t)(0 * PWM_MAX_DUTY)
 
 #define MELODY_MAX_SIZE 128
 
@@ -51,6 +47,7 @@ extern "C" void app_main()
         etl::delegate<void()>::create<Buzzer, &Buzzer::start>(buzzer),
         etl::delegate<void()>::create<Buzzer, &Buzzer::stop>(buzzer)
     );
+
     while (1)
     {
         button.update();
