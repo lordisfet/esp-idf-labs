@@ -1,6 +1,8 @@
+#pragma once
+
 #include <stdio.h>
 
-enum class Note : uint16_t {
+enum class Note : uint32_t {
     C3 = 130,
     D3 = 146,
     E3 = 164,
