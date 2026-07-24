@@ -2,6 +2,7 @@
 #include <math.h>
 #include <cstring>
 #include <etl/vector.h>
+#include <etl/delegate.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -31,97 +32,63 @@
 #define PWM_MAX_DUTY ADC_MAX_RAW
 #define PWM_DUTY_CYCLE (uint16_t)(0 * PWM_MAX_DUTY)
 
+#define MELODY_MAX_SIZE 128
+
 #define TASK_DELAY 20
 
-void parse_adc_buffer(uint8_t *buffer, uint32_t lenght, adc_digi_output_data_t *raw, uint32_t *num_samples){
-    uint32_t num = lenght / SOC_ADC_DIGI_RESULT_BYTES;
-    for (uint32_t i = 0; i < num; i++) {
-        memcpy(&raw[i], buffer + i * SOC_ADC_DIGI_RESULT_BYTES, sizeof(adc_digi_output_data_t));
-    }
-    *num_samples = num;  
-}
-uint32_t calculate_avg_raw(adc_digi_output_data_t *raw, uint8_t unit, uint8_t channel, const uint32_t num_samples) {
-    uint32_t sum = 0;
-    uint8_t current_samples = 0;
-    for (uint32_t i = 0; i < num_samples; i++) {
-        if (unit == raw[i].type2.unit && channel == raw[i].type2.channel)
-        {
-            sum += raw[i].type2.data;
-            current_samples++;
-        }
-    }
-
-    return sum/current_samples;
-}
 extern "C" void app_main()
 {
-    Button button(TAG_BUTTON, GPIO_BUTTON);
-
     PWM pwm(GPIO_BUZZER);
-    static etl::vector<MelodyNote, MELODY_MAX_SIZE> astronomia = {
+    static etl::vector<MelodyNote, MELODY_MAX_SIZE> melody = {
+    // --- Разгон (Habataitara modoranai to itte) ---
+    MelodyNote(Note::A5, 150, 2048, 20),
+    MelodyNote(Note::B5, 150, 2048, 20),
+    MelodyNote(Note::C6, 300, 2048, 30),
+    MelodyNote(Note::B5, 150, 2048, 20),
+    MelodyNote(Note::A5, 150, 2048, 20),
+    MelodyNote(Note::G5, 150, 2048, 20),
+    MelodyNote(Note::A5, 400, 2048, 50),
 
-        // Intro riff
-        MelodyNote(Note::E4, 250, 2048, 40),
-        MelodyNote(Note::F4, 250, 2048, 40),
-        MelodyNote(Note::G4, 250, 2048, 40),
-        MelodyNote(Note::E4, 250, 2048, 40),
+    // --- Набор высоты (Mezashita no wa) ---
+    MelodyNote(Note::C6, 150, 2048, 20),
+    MelodyNote(Note::D6, 150, 2048, 20),
+    MelodyNote(Note::E6, 300, 2048, 30),
+    MelodyNote(Note::D6, 150, 2048, 20),
+    MelodyNote(Note::C6, 150, 2048, 20),
+    MelodyNote(Note::B5, 150, 2048, 20),
+    MelodyNote(Note::C6, 400, 2048, 50),
 
-        MelodyNote(Note::D4, 250, 2048, 40),
-        MelodyNote(Note::C4, 250, 2048, 40),
-        MelodyNote(Note::D4, 250, 2048, 40),
-        MelodyNote(Note::E4, 250, 2048, 40),
+    // --- Крейсерский режим (Aoi aoi ano sora) ---
+    MelodyNote(Note::E6, 200, 2048, 20),
+    MelodyNote(Note::E6, 200, 2048, 20),
+    MelodyNote(Note::E6, 200, 2048, 20),
+    MelodyNote(Note::C6, 150, 2048, 20),
+    MelodyNote(Note::D6, 500, 2048, 50),
 
-        // Repeat with slight variation
-        MelodyNote(Note::G4, 250, 2048, 40),
-        MelodyNote(Note::A4, 250, 2048, 40),
-        MelodyNote(Note::G4, 250, 2048, 40),
-        MelodyNote(Note::F4, 250, 2048, 40),
+    // --- Переход на форсаж (Прыжок в 6 и 7 октавы) ---
+    MelodyNote(Note::A6, 150, 2048, 20),
+    MelodyNote(Note::B6, 150, 2048, 20),
+    MelodyNote(Note::C7, 300, 2048, 30),
+    MelodyNote(Note::B6, 150, 2048, 20),
+    MelodyNote(Note::A6, 150, 2048, 20),
+    MelodyNote(Note::G6, 150, 2048, 20),
+    
+    // --- Захват цели (Фиксация) ---
+    MelodyNote(Note::A6, 600, 2048, 0)
+};
 
-        MelodyNote(Note::E4, 250, 2048, 40),
-        MelodyNote(Note::D4, 250, 2048, 40),
-        MelodyNote(Note::C4, 250, 2048, 40),
-        MelodyNote(Note::D4, 250, 2048, 40),
-
-        // Main hook
-        MelodyNote(Note::E4, 300, 2048, 50),
-        MelodyNote(Note::G4, 300, 2048, 50),
-        MelodyNote(Note::C5, 300, 2048, 50),
-        MelodyNote(Note::B4, 300, 2048, 50),
-
-        MelodyNote(Note::A4, 300, 2048, 50),
-        MelodyNote(Note::G4, 300, 2048, 50),
-        MelodyNote(Note::F4, 300, 2048, 50),
-        MelodyNote(Note::E4, 300, 2048, 50),
-
-        // Ending loop
-        MelodyNote(Note::D4, 250, 2048, 40),
-        MelodyNote(Note::E4, 250, 2048, 40),
-        MelodyNote(Note::F4, 250, 2048, 40),
-        MelodyNote(Note::G4, 250, 2048, 40),
-
-        MelodyNote(Note::A4, 250, 2048, 40),
-        MelodyNote(Note::G4, 250, 2048, 40),
-        MelodyNote(Note::F4, 250, 2048, 40),
-        MelodyNote(Note::E4, 250, 2048, 40),
-    };
-
-    Buzzer buzzer(pwm, astronomia);
-    buzzer.start();
+    const etl::string<MAX_NAME_LENGHT> name = "BUZZER";
+    Buzzer buzzer(name, pwm, melody);
+    Button button(
+        TAG_BUTTON, 
+        GPIO_BUTTON,
+        etl::delegate<void()>::create<Buzzer, &Buzzer::start>(buzzer),
+        etl::delegate<void()>::create<Buzzer, &Buzzer::stop>(buzzer)
+    );
     while (1)
     {
         button.update();
-        if(button.isPressed())
-        {
-            buzzer.play();
-            ESP_LOGI(TAG_BUZZER, "ACTIVE...");
-        }
-        else
-        {
-            buzzer.stop();
-            ESP_LOGI(TAG_BUZZER, "NONACTINE...");
-        }
-
-        xTaskGetTickCount();
+        buzzer.play();
         vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
     }
 }

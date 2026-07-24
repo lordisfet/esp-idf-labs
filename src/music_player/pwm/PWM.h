@@ -24,4 +24,6 @@ public:
 
     void updateFrequency(uint32_t new_freq);
     void updateDuty(uint32_t new_duty);
+    void pause() {ledc_timer_pause(LEDC_LOW_SPEED_MODE, _timer_num);}
+    void resume() {ledc_timer_resume(LEDC_LOW_SPEED_MODE, _timer_num);}
 };

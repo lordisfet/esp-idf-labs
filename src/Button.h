@@ -6,16 +6,16 @@
 #include "esp_timer.h"
 #include <time.h>
 #include "esp_task_wdt.h"
+#include "etl/delegate.h"
 
 #define DEBOUNCE_TIME 50000 // 50 ms
 
-enum ButtonState
-{
+typedef enum {
     IDLE,
     RELEASED,
     DEBOUNCE,
     PRESSED,
-};
+} ButtonState;
 
 class Button
 {
@@ -23,40 +23,54 @@ class Button
     const char* _TAG;
     gpio_num_t _pin;
     unsigned long long _pinMask;
-    int _debounceTime; // 50 ms
+    int _debounceTime;
 
-    bool _state; // true - pressed, false - released
-    enum ButtonState _internalState;
+    bool _isToggled;
+    etl::delegate<void()> _onToggleOn;
+    etl::delegate<void()> _onToggleOff;
 
+    ButtonState _internalState;
     ulong lastLevelSwitchTime;
     int lastlevel;
 
     public:
-    Button(const char* TAG, gpio_num_t pin, int debounceTime = DEBOUNCE_TIME, bool state = false)
+    void setOnToggleOn(etl::delegate<void()> cb) {_onToggleOn = cb;}
+    void setOnToggleOff(etl::delegate<void()> cb) {_onToggleOff = cb;}
+
+    Button(const char* TAG, 
+           gpio_num_t pin, 
+           etl::delegate<void()> onToggleOn = etl::delegate<void()>(),
+           etl::delegate<void()> onToggleOff = etl::delegate<void()>(),
+           int debounceTime = DEBOUNCE_TIME)
+        : _TAG(TAG),
+          _pin(pin),
+          _pinMask(1ULL << pin),
+          _debounceTime(debounceTime),
+          _isToggled(false),
+          _onToggleOn(onToggleOn),
+          _onToggleOff(onToggleOff),
+          _internalState(IDLE),
+          lastLevelSwitchTime(0),
+          lastlevel(0)
     {
-        _TAG = TAG;
-        _pin = pin;
-        _pinMask = 1ULL << _pin;
-        _debounceTime = debounceTime;
-        _state = state;
-        _internalState = IDLE;
-        lastLevelSwitchTime = 0;
+        // Читаем фактическое состояние пина
         lastlevel = gpio_get_level(_pin);
 
         const gpio_config_t configButton =
         {
-            .pin_bit_mask = _pinMask,
+            .pin_bit_mask = _pinMask, // Используем уже посчитанную маску
             .mode = GPIO_MODE_INPUT,
             .pull_up_en = GPIO_PULLUP_ENABLE,
             .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_DISABLE};
+            .intr_type = GPIO_INTR_DISABLE
+        };
 
         ESP_ERROR_CHECK(gpio_config(&configButton));
     }
 
     bool isPressed()
     {
-        return _state;
+        return _isToggled;
     }
 
     esp_err_t update()
@@ -92,10 +106,18 @@ class Button
             }
             break;
         case PRESSED:
-            _state = !_state;
+            _isToggled = !_isToggled;
             lastlevel = currentLevel;
             _internalState = IDLE;
-            ESP_LOGI(_TAG, "Button state: %s", _state ? "active" : "inactive");
+            ESP_LOGI(_TAG, "Button state: %s", _isToggled ? "active" : "inactive");
+
+            if (_isToggled)
+            {
+                if (_onToggleOn.is_valid()) _onToggleOn();
+            }
+            else {
+                if (_onToggleOff.is_valid()) _onToggleOff();
+            }
             break;
         case RELEASED:
             lastlevel = currentLevel;

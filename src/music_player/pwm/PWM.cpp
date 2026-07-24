@@ -25,6 +25,7 @@ PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel,
 
     ESP_ERROR_CHECK(ledc_timer_config(&pwm_timer_config));
     ESP_ERROR_CHECK(ledc_channel_config(&buzzer_channel_config));
+    pause();
 }
 
 void PWM::updateFrequency(uint32_t new_freq) {
