@@ -20,6 +20,7 @@
 #include ".\music_player\pwm\PWM.h"
 #include ".\music_player\note\MelodyNote.h"
 #include ".\music_player\buzzer\Buzzer.h"
+#include ".\music_player\songs\jingle_bells.h"
 
 #define TAG_BUTTON "BUTTON"
 #define GPIO_BUTTON GPIO_NUM_16
@@ -39,34 +40,8 @@
 extern "C" void app_main()
 {
     PWM pwm(GPIO_BUZZER);
-    static etl::vector<MelodyNote, MELODY_MAX_SIZE> melody = {
-        // --- Щедрик (Shchedryk) ---
-        // Основной остинатный мотив (ритмичный фон)
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::G5, 150, 2048, 20),
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::F5, 150, 2048, 20),
-
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::G5, 150, 2048, 20),
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::F5, 150, 2048, 20),
-
-        // Развитие темы (переход в верхний регистр)
-        MelodyNote(Note::C6, 300, 2048, 30),
-        MelodyNote(Note::B5, 150, 2048, 20),
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::G5, 300, 2048, 30),
-        MelodyNote(Note::F5, 300, 2048, 30),
-        MelodyNote(Note::E5, 400, 2048, 40),
-
-        // Кульминация и завершение маневра
-        MelodyNote(Note::A5, 150, 2048, 20),
-        MelodyNote(Note::G5, 150, 2048, 20),
-        MelodyNote(Note::F5, 150, 2048, 20),
-        MelodyNote(Note::E5, 150, 2048, 20),
-        MelodyNote(Note::A5, 600, 2048, 0)
-    };
+    static etl::vector<MelodyNote, MELODY_MAX_SIZE> melody;
+    load_jingle_bells(melody);
 
     const etl::string<MAX_NAME_LENGHT> name = "BUZZER";
     Buzzer buzzer(name, pwm, melody);
