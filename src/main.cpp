@@ -40,42 +40,33 @@ extern "C" void app_main()
 {
     PWM pwm(GPIO_BUZZER);
     static etl::vector<MelodyNote, MELODY_MAX_SIZE> melody = {
-    // --- Разгон (Habataitara modoranai to itte) ---
-    MelodyNote(Note::A5, 150, 2048, 20),
-    MelodyNote(Note::B5, 150, 2048, 20),
-    MelodyNote(Note::C6, 300, 2048, 30),
-    MelodyNote(Note::B5, 150, 2048, 20),
-    MelodyNote(Note::A5, 150, 2048, 20),
-    MelodyNote(Note::G5, 150, 2048, 20),
-    MelodyNote(Note::A5, 400, 2048, 50),
+        // --- Щедрик (Shchedryk) ---
+        // Основной остинатный мотив (ритмичный фон)
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::G5, 150, 2048, 20),
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::F5, 150, 2048, 20),
 
-    // --- Набор высоты (Mezashita no wa) ---
-    MelodyNote(Note::C6, 150, 2048, 20),
-    MelodyNote(Note::D6, 150, 2048, 20),
-    MelodyNote(Note::E6, 300, 2048, 30),
-    MelodyNote(Note::D6, 150, 2048, 20),
-    MelodyNote(Note::C6, 150, 2048, 20),
-    MelodyNote(Note::B5, 150, 2048, 20),
-    MelodyNote(Note::C6, 400, 2048, 50),
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::G5, 150, 2048, 20),
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::F5, 150, 2048, 20),
 
-    // --- Крейсерский режим (Aoi aoi ano sora) ---
-    MelodyNote(Note::E6, 200, 2048, 20),
-    MelodyNote(Note::E6, 200, 2048, 20),
-    MelodyNote(Note::E6, 200, 2048, 20),
-    MelodyNote(Note::C6, 150, 2048, 20),
-    MelodyNote(Note::D6, 500, 2048, 50),
+        // Развитие темы (переход в верхний регистр)
+        MelodyNote(Note::C6, 300, 2048, 30),
+        MelodyNote(Note::B5, 150, 2048, 20),
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::G5, 300, 2048, 30),
+        MelodyNote(Note::F5, 300, 2048, 30),
+        MelodyNote(Note::E5, 400, 2048, 40),
 
-    // --- Переход на форсаж (Прыжок в 6 и 7 октавы) ---
-    MelodyNote(Note::A6, 150, 2048, 20),
-    MelodyNote(Note::B6, 150, 2048, 20),
-    MelodyNote(Note::C7, 300, 2048, 30),
-    MelodyNote(Note::B6, 150, 2048, 20),
-    MelodyNote(Note::A6, 150, 2048, 20),
-    MelodyNote(Note::G6, 150, 2048, 20),
-    
-    // --- Захват цели (Фиксация) ---
-    MelodyNote(Note::A6, 600, 2048, 0)
-};
+        // Кульминация и завершение маневра
+        MelodyNote(Note::A5, 150, 2048, 20),
+        MelodyNote(Note::G5, 150, 2048, 20),
+        MelodyNote(Note::F5, 150, 2048, 20),
+        MelodyNote(Note::E5, 150, 2048, 20),
+        MelodyNote(Note::A5, 600, 2048, 0)
+    };
 
     const etl::string<MAX_NAME_LENGHT> name = "BUZZER";
     Buzzer buzzer(name, pwm, melody);
