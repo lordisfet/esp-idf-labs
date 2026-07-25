@@ -22,6 +22,7 @@
 #include ".\music_player\buzzer\Buzzer.h"
 #include ".\music_player\songs\jingle_bells.h"
 #include ".\music_player\songs\blue_bird.h"
+#include ".\music_player\songs\frieren_the_brave.h"
 
 #define TAG_BUTTON "BUTTON"
 #define GPIO_BUTTON GPIO_NUM_16
@@ -38,7 +39,7 @@ extern "C" void app_main()
 {
     PWM pwm(GPIO_BUZZER);
     static etl::vector<MelodyNote, MELODY_MAX_SIZE> melody;
-    load_naruto_blue_bird(melody);
+    load_frieren_the_brave(melody);
 
     const etl::string<MAX_NAME_LENGHT> name = "BUZZER";
     Buzzer buzzer(name, pwm, melody);
