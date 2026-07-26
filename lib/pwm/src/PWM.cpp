@@ -4,8 +4,8 @@ PWM::PWM(uint8_t pin, uint32_t freq, uint32_t duty,
         ledc_timer_t timer_num, ledc_channel_t channel, 
         ledc_intr_type_t intr_type, 
         ledc_mode_t speed_mode, ledc_timer_bit_t duty_res, ledc_clk_cfg_t clk_cfg) : 
-        _pin(pin), _timer_num(timer_num), _channel(channel), 
-        _freq(freq), _duty(duty), _intr_type(intr_type), _speed_mode(speed_mode), 
+        _pin(pin),  _freq(freq), _duty(duty), _timer_num(timer_num), 
+        _channel(channel), _intr_type(intr_type), _speed_mode(speed_mode), 
         _duty_res(duty_res), _clk_cfg(clk_cfg)
 {
     ledc_timer_config_t pwm_timer_config = {
