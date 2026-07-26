@@ -22,8 +22,8 @@
 
 #define TAG_SERVO "SERVO"
 #define GPIO_SERVO GPIO_NUM_4
-#define SERVO_LEFT_DUTY_MS 1
-#define SERVO_RIGHT_DUTY_MS 2
+#define SERVO_LEFT_DUTY_US 500
+#define SERVO_RIGHT_DUTY_US 2500
 #define PWM_FREQ 50
 
 #define TAG_HANDLE "HANDLE"
@@ -67,27 +67,16 @@ extern "C" void app_main()
 
     uint8_t buffer[ADC_BUFFER_MAX_SIZE] = {0};
     ADC adc(adc_config, continuous_config, buffer, ADC_BUFFER_MAX_SIZE, 50);
-    
     PWM pwm(GPIO_SERVO, PWM_FREQ, 0);
-    adc_oneshot_unit_handle_t handle =nullptr;
-    adc_oneshot_unit_init_cfg_t cfg = {
-        .unit_id = ADC_UNIT, 
-        .clk_src = ADC_RTC_CLK_SRC_DEFAULT,
-        .ulp_mode = ADC_ULP_MODE_DISABLE 
-    };
-    ESP_ERROR_CHECK(adc_oneshot_new_unit(&cfg, &handle));
-
-    adc_oneshot_chan_cfg_t channel_cfg = {
-        .atten = ADC_ATTEN,
-        .bitwidth = ADC_BITWIDTH,
-    };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(handle, ADC_CHANNEL, &channel_cfg));
     int raw;
 
     while (true)
     {
         raw = adc.get_filtered_raw(ADC_UNIT, ADC_CHANNEL);
-        ESP_LOGI(TAG_HANDLE, "ADC value: %d", raw);
+        uint32_t newDuty = SERVO_LEFT_DUTY_US + (SERVO_RIGHT_DUTY_US - SERVO_LEFT_DUTY_US) * ((double)raw/adc.get_max_adc_value());
+        pwm.setDutyAsUs(newDuty);
+        
+        ESP_LOGI(TAG_HANDLE, "ADC value: %d, PWM duty in us: %lu", raw, pwm.getDutyInUs());
         vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
     }
 }

@@ -8,6 +8,8 @@ PWM::PWM(uint8_t pin, uint32_t freq, uint32_t duty,
         _channel(channel), _intr_type(intr_type), _speed_mode(speed_mode), 
         _duty_res(duty_res), _clk_cfg(clk_cfg)
 {
+    _max_duty = pow(2, duty_res) - 1;
+
     ledc_timer_config_t pwm_timer_config = {
         .speed_mode = _speed_mode,
         .duty_resolution = _duty_res,
@@ -40,4 +42,15 @@ void PWM::updateDuty(uint32_t new_duty) {
     _duty = new_duty;
     ledc_set_duty(_speed_mode, _channel, _duty);
     ledc_update_duty(_speed_mode, _channel);
+}
+
+void PWM::setDutyAsUs(uint32_t us){
+    if (us > getPeriod())
+    {
+        ESP_LOGE("PWM", "duty in us is greater than pwm period, max us`s value is %lu", getPeriod());
+        return;
+    }
+    
+    uint32_t new_duty = _max_duty * ((double)us / getPeriod());
+    updateDuty(new_duty);
 }
