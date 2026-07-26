@@ -31,7 +31,7 @@
 #define GPIO_BUZZER GPIO_NUM_21
 
 
-#define MELODY_MAX_SIZE 256
+#define MELODY_MAX_SIZE 1024
 
 #define TASK_DELAY 20
 
