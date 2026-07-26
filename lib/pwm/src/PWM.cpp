@@ -1,7 +1,8 @@
 #include "./PWM.h"
 
-PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel, 
-        uint32_t freq, uint32_t duty, ledc_intr_type_t intr_type, 
+PWM::PWM(uint8_t pin, uint32_t freq, uint32_t duty, 
+        ledc_timer_t timer_num, ledc_channel_t channel, 
+        ledc_intr_type_t intr_type, 
         ledc_mode_t speed_mode, ledc_timer_bit_t duty_res, ledc_clk_cfg_t clk_cfg) : 
         _pin(pin), _timer_num(timer_num), _channel(channel), 
         _freq(freq), _duty(duty), _intr_type(intr_type), _speed_mode(speed_mode), 
@@ -28,7 +29,6 @@ PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel,
 
     ESP_ERROR_CHECK(ledc_timer_config(&pwm_timer_config));
     ESP_ERROR_CHECK(ledc_channel_config(&buzzer_channel_config));
-    pause();
 }
 
 void PWM::updateFrequency(uint32_t new_freq) {
