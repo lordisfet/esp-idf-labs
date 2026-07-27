@@ -15,6 +15,8 @@
 #include "esp_adc/adc_continuous.h"
 #include "adc/ADC.h"
 
+#include <ESP32Encoder.h>
+
 #define TASK_DELAY 5
 
 #define TAG_BUTTON "BUTTON"
@@ -43,6 +45,7 @@
 
 extern "C" void app_main()
 {
+    ESP32Encoder encoder;
     adc_continuous_handle_cfg_t adc_config = {
         .max_store_buf_size = ADC_BUFFER_MAX_SIZE,
         .conv_frame_size = ADC_CONV_FRAME_SIZE,
