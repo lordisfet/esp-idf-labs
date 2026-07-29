@@ -52,4 +52,6 @@ esp_err_t PWM::setDutyAsUs(uint32_t us){
     
     uint32_t new_duty = _max_duty * ((double)us / getPeriod());
     updateDuty(new_duty);
+
+    return ESP_OK;
 }
