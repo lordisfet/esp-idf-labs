@@ -30,7 +30,6 @@ void IRAM_ATTR Encoder::isr_handler(void* arg)
             if (now - enc->_last_step_time > MIN_STEP_DELAY_US) 
             {
                 enc->_steps = enc->_steps + 1;
-                enc->_count = enc->_count + 1;
                 enc->_last_step_time = now; // Запоминаем время выстрела
                 
                 int current = enc->_steps;
@@ -50,7 +49,6 @@ void IRAM_ATTR Encoder::isr_handler(void* arg)
             if (now - enc->_last_step_time > MIN_STEP_DELAY_US)
             {
                 enc->_steps = enc->_steps - 1;
-                enc->_count = enc->_count + 1;
                 enc->_last_step_time = now; // Запоминаем время выстрела
                 
                 int current = enc->_steps;
