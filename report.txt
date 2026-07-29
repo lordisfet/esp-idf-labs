@@ -1,0 +1,49 @@
+I (31604) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (32614) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 1735
+I (32614) ADC_ONESHOT_EXAMPLE: ADC Voltage: 1398 mV
+I (32614) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 1422 mV
+I (32614) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 0.73 %
+I (32614) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (33624) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 1792
+I (33624) ADC_ONESHOT_EXAMPLE: ADC Voltage: 1444 mV
+I (33624) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 1467 mV
+I (33624) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 0.70 %
+I (33624) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (34634) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 2419
+I (34634) ADC_ONESHOT_EXAMPLE: ADC Voltage: 1949 mV
+I (34634) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 1973 mV
+I (34634) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 0.73 %
+I (34634) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (35644) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 2502
+I (35644) ADC_ONESHOT_EXAMPLE: ADC Voltage: 2016 mV
+I (35644) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 2039 mV
+I (35644) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 0.70 %
+I (35644) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (36654) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 3480
+I (36654) ADC_ONESHOT_EXAMPLE: ADC Voltage: 2804 mV
+I (36654) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 2763 mV
+I (36654) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 1.24 %
+I (36654) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (37664) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 4095
+I (37664) ADC_ONESHOT_EXAMPLE: ADC Voltage: 3300 mV
+I (37664) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 3098 mV
+I (37664) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 6.12 %
+I (37664) ADC_ONESHOT_EXAMPLE: -----------------------------
+I (38674) ADC_ONESHOT_EXAMPLE: ADC Raw Data: 4095
+I (38674) ADC_ONESHOT_EXAMPLE: ADC Voltage: 3300 mV
+I (38674) ADC_ONESHOT_EXAMPLE: ADC Calibrated Voltage: 3098 mV
+I (38674) ADC_ONESHOT_EXAMPLE: Manual diff to calibrated: 6.12 %
+I (38674) ADC_ONESHOT_EXAMPLE: -----------------------------
+
+Цыкаво, що максимальне значення напруги отримане з використанянм драйвера калібрування має обмеження в 3.1 В. 
+Як я розумію це повязано з атенюацією, ядро що фізично містить ADC1 та ADC2 має референсне значення напруги 1.1 В.
+в документаціїї вказано, що практично це значення в діапазоні [1.0; 1.2] В. 
+
+Тому для коректого конвертування аналового значення в цифрове використовують додатково внутрішній дільник напруги,
+що досволяє збільшити діапазон вимірюваних напруг, от при атенюаторі в -11Db можна перетворити значення в дыапазоны 
+[0;3.1], що й було продемонстровано в результатах роботи. 
+
+Для корекції і існує дравер калібрування. В цій роботі я використав калібрування по кривій яка опимана поліном коефіціенти для 
+якого зберігаються в efuse 
+
+
