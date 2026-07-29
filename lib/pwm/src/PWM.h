@@ -7,7 +7,7 @@
 #include "esp_log.h"
 
 #define DEFAULT_FREQUENCY 50
-#define DEFAULT_DUTY 2048
+#define DEFAULT_DUTY 0
 #define DEFAUL_TIMER_NUM LEDC_TIMER_0
 #define DEFAULT_CHANNEL_NUM LEDC_CHANNEL_0 
 #define TO_US 1000000
@@ -25,6 +25,8 @@ private:
     ledc_timer_bit_t _duty_res;
     double _max_duty;
     ledc_clk_cfg_t _clk_cfg;
+
+    void updateDuty(uint32_t new_duty);
 public:
     PWM(uint8_t pin, uint32_t freq = DEFAULT_FREQUENCY, 
         uint32_t duty = DEFAULT_DUTY, ledc_timer_t timer_num = DEFAUL_TIMER_NUM, 
@@ -36,11 +38,8 @@ public:
 
     uint32_t getPeriod() {return TO_US/_freq;}   
     uint32_t getDutyInUs() {return (_duty/_max_duty) * getPeriod();} 
-
-    void updateFrequency(uint32_t new_freq);
-    void updateDuty(uint32_t new_duty);
+    void setFrequency(uint32_t new_freq);
+    esp_err_t setDutyAsUs(uint32_t us);
     void pause() {ledc_timer_pause(_speed_mode, _timer_num);}
     void resume() {ledc_timer_resume(_speed_mode, _timer_num);}
-
-    void setDutyAsUs(uint32_t ms);
 };
