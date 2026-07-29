@@ -1,3 +1,5 @@
+#pragma once
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -7,7 +9,7 @@
 #include "esp_task_wdt.h"
 #include "etl/delegate.h"
 
-#define DEBOUNCE_TIME 50000 // 50 ms
+#define DEBOUNCE_TIME 10000 // 50 ms
 
 typedef enum {
     IDLE,
@@ -33,6 +35,8 @@ class Button
     int lastlevel;
 
     public:
+    void toggleOff() {_isToggled = false;}
+
     void setOnToggleOn(etl::delegate<void()> cb) {_onToggleOn = cb;}
     void setOnToggleOff(etl::delegate<void()> cb) {_onToggleOff = cb;}
 
@@ -105,7 +109,7 @@ class Button
             }
             break;
         case PRESSED:
-            _isToggled = !_isToggled;
+            _isToggled = true;
             lastlevel = currentLevel;
             _internalState = IDLE;
             ESP_LOGI(_TAG, "Button state: %s", _isToggled ? "active" : "inactive");

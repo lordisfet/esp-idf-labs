@@ -1,82 +1,72 @@
-#include <stdio.h>
-#include <PWM.h>
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/gpio.h"
 #include "driver/ledc.h"
-#include "esp_log.h"
-#include "esp_adc/adc_oneshot.h"
-#include "soc/gpio_struct.h"
-#include "soc/adc_channel.h"
-#include "soc/soc_caps.h"
-#include "esp_adc/adc_cali.h"
-#include "esp_adc/adc_cali_scheme.h"
-#include "hal/adc_types.h"
-#include "esp_adc/adc_continuous.h"
-#include "adc/ADC.h"
+#include "encoder/Encoder.h"
 
-#define TASK_DELAY 5
 
-#define TAG_BUTTON "BUTTON"
-#define GPIO_BUTTON GPIO_NUM_16
+#define SERVO_PWM_TIMER         LEDC_TIMER_0
+#define SERVO_PWM_MODE          LEDC_LOW_SPEED_MODE
+#define SERVO_OUTPUT_IO         (GPIO_NUM_18) 
+#define SERVO_PWM_CHANNEL       LEDC_CHANNEL_0
+#define SERVO_PWM_FREQ          50            
 
-#define TAG_SERVO "SERVO"
-#define GPIO_SERVO GPIO_NUM_4
-#define SERVO_LEFT_DUTY_US 500
-#define SERVO_RIGHT_DUTY_US 2500
-#define PWM_FREQ 50
-
-#define TAG_HANDLE "HANDLE"
-#define GPIO_HANDLE GPIO_NUM_1
-
-#define ADC_CONV_FRAME_SIZE TASK_DELAY * SOC_ADC_DIGI_RESULT_BYTES
-#define ADC_FRAME_COUNT 4
-#define ADC_BUFFER_MAX_SIZE ADC_FRAME_COUNT * ADC_CONV_FRAME_SIZE
-#define ADC_PATTERN_NUM 1
-#define ADC_ATTEN ADC_ATTEN_DB_11
-#define ADC_CHANNEL ADC_CHANNEL_0
-#define ADC_SAMPLE_FREQ 1000
-#define ADC_UNIT ADC_UNIT_1
-#define ADC_BITWIDTH ADC_BITWIDTH_12
-#define ADC_CONV_MODE ADC_CONV_SINGLE_UNIT_1
-#define ADC_DIGI_OUTPUT_FORMAT ADC_DIGI_OUTPUT_FORMAT_TYPE2
-
-extern "C" void app_main()
+void init_servo() 
 {
-    adc_continuous_handle_cfg_t adc_config = {
-        .max_store_buf_size = ADC_BUFFER_MAX_SIZE,
-        .conv_frame_size = ADC_CONV_FRAME_SIZE,
+    ledc_timer_config_t timer_conf = {
+        .speed_mode       = SERVO_PWM_MODE,
+        .duty_resolution  = LEDC_TIMER_12_BIT, 
+        .timer_num        = SERVO_PWM_TIMER,
+        .freq_hz          = SERVO_PWM_FREQ,
+        .clk_cfg          = LEDC_AUTO_CLK
     };
+    ledc_timer_config(&timer_conf);
 
-    adc_digi_pattern_config_t adc_patterns[ADC_PATTERN_NUM] = {
-        {
-            .atten = ADC_ATTEN,
-            .channel = ADC_CHANNEL,
-            .unit = ADC_UNIT,
-            .bit_width = ADC_BITWIDTH
-        }
+    ledc_channel_config_t channel_conf = {
+        .gpio_num         = SERVO_OUTPUT_IO,
+        .speed_mode       = SERVO_PWM_MODE,
+        .channel          = SERVO_PWM_CHANNEL,
+        .intr_type        = LEDC_INTR_DISABLE,
+        .timer_sel        = SERVO_PWM_TIMER,
+        .duty             = 0,
+        .hpoint           = 0
     };
+    ledc_channel_config(&channel_conf);
+}
 
-    adc_continuous_config_t continuous_config = {
-        .pattern_num = ADC_PATTERN_NUM,
-        .adc_pattern = adc_patterns,
-        .sample_freq_hz = ADC_SAMPLE_FREQ,
-        .conv_mode = ADC_CONV_MODE,
-        .format = ADC_DIGI_OUTPUT_FORMAT,
-    };
+uint32_t angle_to_duty(int angle) 
+{
+    if (angle < 0) angle = 0;
+    if (angle > 180) angle = 180;
+    
+    uint32_t duty = 102 + ((angle * (512 - 102)) / 180);
+    return duty;
+}
 
-    uint8_t buffer[ADC_BUFFER_MAX_SIZE] = {0};
-    ADC adc(adc_config, continuous_config, buffer, ADC_BUFFER_MAX_SIZE, 50);
-    PWM pwm(GPIO_SERVO, PWM_FREQ, 0);
-    int raw;
+extern "C" void app_main() 
+{
+    gpio_install_isr_service(0);
+    init_servo();
+
+    Encoder encoder(GPIO_NUM_17, GPIO_NUM_15);
+    int current_steps = 0;
+
+    ESP_LOGI("SERVO", "Система управления рулями активирована.");
 
     while (true)
     {
-        raw = adc.get_filtered_raw(ADC_UNIT, ADC_CHANNEL);
-        uint32_t newDuty = SERVO_LEFT_DUTY_US + (SERVO_RIGHT_DUTY_US - SERVO_LEFT_DUTY_US) * ((double)raw/adc.get_max_adc_value());
-        pwm.setDutyAsUs(newDuty);
-        
-        ESP_LOGI(TAG_HANDLE, "ADC value: %d, PWM duty in us: %lu", raw, pwm.getDutyInUs());
-        vTaskDelay(pdMS_TO_TICKS(TASK_DELAY));
+        if (xQueueReceive(encoder.step_queue, &current_steps, portMAX_DELAY))
+        {
+            int target_angle = current_steps * 5;
+
+            if (target_angle < 0) target_angle = 0;
+            if (target_angle > 180) target_angle = 180;
+
+            uint32_t duty = angle_to_duty(target_angle);
+            ledc_set_duty(SERVO_PWM_MODE, SERVO_PWM_CHANNEL, duty);
+            ledc_update_duty(SERVO_PWM_MODE, SERVO_PWM_CHANNEL);
+
+            ESP_LOGI("SERVO", "Шаги: %d | Угол серво: %d град.", current_steps, target_angle);
+        }
     }
 }
