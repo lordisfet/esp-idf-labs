@@ -5,14 +5,16 @@
 #include "esp_attr.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"  
+#include "driver/pulse_cnt.h"
 
 #define MIN_STEP_DELAY_US 1000
 
 class Encoder
 {
 private:
-    gpio_num_t _clk;
-    gpio_num_t _dt;
+    pcnt_unit_handle_t _pcnt_unit = nullptr;
+    pcnt_channel_handle_t _pcnt_channel_clk = nullptr;
+    pcnt_channel_handle_t _pcnt_channel_dt = nullptr;
     
     enum {
         IDLE,
@@ -28,6 +30,6 @@ private:
 public:
     QueueHandle_t step_queue; 
 
-    Encoder(gpio_num_t clk, gpio_num_t dt);
+    Encoder();
     int getSteps() { return _steps; }
 };
