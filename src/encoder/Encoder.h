@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+
 #include "esp_timer.h"
 #include "driver/gpio.h"
 #include "esp_attr.h"
@@ -12,24 +14,14 @@
 class Encoder
 {
 private:
-    pcnt_unit_handle_t _pcnt_unit = nullptr;
-    pcnt_channel_handle_t _pcnt_channel_clk = nullptr;
-    pcnt_channel_handle_t _pcnt_channel_dt = nullptr;
-    
-    enum {
-        IDLE,
-        RIGHT_STEP,
-        LEFT_STEP,
-        RELEASE
-    } _state;
+    pcnt_unit_handle_t _unit = nullptr;
+    pcnt_channel_handle_t _channel_clk = nullptr;
+    pcnt_channel_handle_t _channel_dt = nullptr;
+    std::atomic<int> _steps{0};
 
-    volatile uint64_t _last_step_time;
-    volatile int _steps;
-
-    static void IRAM_ATTR isr_handler(void* arg);
+    static bool IRAM_ATTR isr_handle(pcnt_unit_handle_t unit, 
+        const pcnt_watch_event_data_t *edata, void *user_ctx);
 public:
-    QueueHandle_t step_queue; 
-
-    Encoder();
-    int getSteps() { return _steps; }
+    int getSteps() {return _steps;}
+    Encoder(gpio_num_t clk, gpio_num_t dt);
 };
