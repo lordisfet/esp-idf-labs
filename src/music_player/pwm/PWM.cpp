@@ -1,12 +1,15 @@
-#include "PWM.h"
+#include "./PWM.h"
 
-PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel, 
-        uint32_t freq, uint32_t duty, ledc_intr_type_t intr_type, 
+PWM::PWM(uint8_t pin, uint32_t freq, uint32_t duty, 
+        ledc_timer_t timer_num, ledc_channel_t channel, 
+        ledc_intr_type_t intr_type, 
         ledc_mode_t speed_mode, ledc_timer_bit_t duty_res, ledc_clk_cfg_t clk_cfg) : 
-        _pin(pin), _timer_num(timer_num), _channel(channel), 
-        _freq(freq), _duty(duty), _intr_type(intr_type), _speed_mode(speed_mode), 
+        _pin(pin),  _freq(freq), _duty(duty), _timer_num(timer_num), 
+        _channel(channel), _intr_type(intr_type), _speed_mode(speed_mode), 
         _duty_res(duty_res), _clk_cfg(clk_cfg)
 {
+    _max_duty = pow(2, duty_res) - 1;
+
     ledc_timer_config_t pwm_timer_config = {
         .speed_mode = _speed_mode,
         .duty_resolution = _duty_res,
@@ -28,10 +31,9 @@ PWM::PWM(uint8_t pin, ledc_timer_t timer_num, ledc_channel_t channel,
 
     ESP_ERROR_CHECK(ledc_timer_config(&pwm_timer_config));
     ESP_ERROR_CHECK(ledc_channel_config(&buzzer_channel_config));
-    pause();
 }
 
-void PWM::updateFrequency(uint32_t new_freq) {
+void PWM::setFrequency(uint32_t new_freq) {
     _freq = new_freq;
     ledc_set_freq(_speed_mode, _timer_num, _freq);
 }
@@ -40,4 +42,16 @@ void PWM::updateDuty(uint32_t new_duty) {
     _duty = new_duty;
     ledc_set_duty(_speed_mode, _channel, _duty);
     ledc_update_duty(_speed_mode, _channel);
+}
+
+esp_err_t PWM::setDutyAsUs(uint32_t us){
+    if (us > getPeriod())
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    uint32_t new_duty = _max_duty * ((double)us / getPeriod());
+    updateDuty(new_duty);
+
+    return ESP_OK;
 }
