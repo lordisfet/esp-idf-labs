@@ -11,11 +11,11 @@ bool Encoder::isr_handle(pcnt_unit_handle_t unit,
     Encoder* enc = static_cast<Encoder*>(user_ctx);
     if (edata->watch_point_value == PCNT_HIGH_LIMIT)
     {
-        enc->_steps.fetch_add(1);
+        enc->_movingDirection = 1;
     }
     else if (edata->watch_point_value == PCNT_LOW_LIMIT)
     {
-        enc->_steps.fetch_sub(1);
+        enc->_movingDirection = -1;
     }
 
     return false;
@@ -60,7 +60,6 @@ Encoder::Encoder(gpio_num_t clk, gpio_num_t dt)
     };
     pcnt_unit_register_event_callbacks(_unit, &callback, this);
 
-    _steps = 0;
     pcnt_unit_enable(_unit);
     pcnt_unit_clear_count(_unit);
     pcnt_unit_start(_unit);

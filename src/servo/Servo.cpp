@@ -8,6 +8,8 @@ esp_err_t Servo::setAngle(uint16_t angle)
         / (_max_point.angle - _min_point.angle)) * (_max_point.duty_us - _min_point.duty_us);
 
     _pwm.setDutyAsUs(new_duty);
-
+    _current_point.angle = angle;
+    _current_point.duty_us = new_duty;
+    
     return ESP_OK;
 }
