@@ -17,14 +17,14 @@ using namespace etl;
 class Buzzer
 {
 private:
-    const string<MAX_NAME_LENGHT>& _name;
+    const char* _name;
     PWM& _pwm;
     const ivector<MelodyNote>& _melody;
     BuzzerState _state;
     uint16_t _current_note;
     uint32_t _next_action_time;
 public:
-    Buzzer(const string<MAX_NAME_LENGHT>& name, PWM& pwm, const ivector<MelodyNote>& melody, uint32_t current_note = 0);
+    Buzzer(const char* name, PWM& pwm, const ivector<MelodyNote>& melody, uint32_t current_note = 0);
 
     void play();
     void start();

@@ -4,7 +4,7 @@
 
 #include "Buzzer.h"
 
-Buzzer::Buzzer(const string<MAX_NAME_LENGHT>& name, PWM& pwm, const ivector<MelodyNote>& melody, uint32_t current_note)
+Buzzer::Buzzer(const char* name, PWM& pwm, const ivector<MelodyNote>& melody, uint32_t current_note)
     : _name(name),
       _pwm(pwm),
       _melody(melody),
@@ -34,7 +34,7 @@ void Buzzer::play() {
     case BuzzerState::IDLE:
         break;
     case BuzzerState::START:
-        ESP_LOGI(_name.c_str(), "Start next note");
+        ESP_LOGI(_name, "Start next note");
         _next_action_time = now + pdMS_TO_TICKS(_melody[_current_note].getDuration());
         _pwm.setFrequency(static_cast<uint32_t>(_melody[_current_note].getNote()));
         _pwm.setDutyAsUs(_melody[_current_note].getDuty());
@@ -47,7 +47,7 @@ void Buzzer::play() {
             _next_action_time += pdMS_TO_TICKS(_melody[_current_note].getPause());
             _pwm.pause();
             _state = BuzzerState::PAUSE;
-            ESP_LOGI(_name.c_str(), "Played note: %lu", static_cast<uint32_t>(_melody[_current_note].getNote()));
+            ESP_LOGI(_name, "Played note: %lu", static_cast<uint32_t>(_melody[_current_note].getNote()));
         }
         break;
     case BuzzerState::PAUSE:
@@ -58,8 +58,10 @@ void Buzzer::play() {
             {
                 _state = BuzzerState::STOP;
             }
-            _state = BuzzerState::START;
-            ESP_LOGI(_name.c_str(), "Paused");
+            else {
+                _state = BuzzerState::START;
+                ESP_LOGI(_name, "Paused");
+            }
         }
         break;
     case BuzzerState::STOP:

@@ -42,16 +42,12 @@ class Button
 
     Button(const char* TAG, 
            gpio_num_t pin, 
-           etl::delegate<void()> onToggleOn = etl::delegate<void()>(),
-           etl::delegate<void()> onToggleOff = etl::delegate<void()>(),
            int debounceTime = DEBOUNCE_TIME)
         : _TAG(TAG),
           _pin(pin),
           _pinMask(1ULL << pin),
           _debounceTime(debounceTime),
           _isToggled(false),
-          _onToggleOn(onToggleOn),
-          _onToggleOff(onToggleOff),
           _internalState(IDLE),
           lastLevelSwitchTime(0),
           lastlevel(0)
@@ -109,17 +105,19 @@ class Button
             }
             break;
         case PRESSED:
-            _isToggled = true;
+            _isToggled = !_isToggled;
             lastlevel = currentLevel;
             _internalState = IDLE;
             ESP_LOGI(_TAG, "Button state: %s", _isToggled ? "active" : "inactive");
 
             if (_isToggled)
             {
-                if (_onToggleOn.is_valid()) _onToggleOn();
+                ESP_LOGI(_TAG, "IS TOGGLED ON");
+                if (_onToggleOn.is_valid()) {ESP_LOGI(_TAG, "DELEGATE IS VALID"); _onToggleOn();}
             }
             else {
-                if (_onToggleOff.is_valid()) _onToggleOff();
+                ESP_LOGI(_TAG, "IS TOGGLED OFF");
+                if (_onToggleOff.is_valid()) {ESP_LOGI(_TAG, "DELEGATE IS VALID"); _onToggleOff();}
             }
             break;
         case RELEASED:
