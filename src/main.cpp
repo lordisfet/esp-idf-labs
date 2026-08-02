@@ -1,72 +1,86 @@
+#include <etl/vector.h>
+#include <Button.h>
+#include <etl/delegate.h>
+
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/ledc.h"
 #include "encoder/Encoder.h"
+#include "servo/Servo.h"
+#include "driver/Driver.h"
+#include "music_player/buzzer/Buzzer.h"
 
-
+#define SERVO                   "SERVO"
 #define SERVO_PWM_TIMER         LEDC_TIMER_0
 #define SERVO_PWM_MODE          LEDC_LOW_SPEED_MODE
-#define SERVO_OUTPUT_IO         (GPIO_NUM_18) 
+#define SERVO_GPIO              GPIO_NUM_18
 #define SERVO_PWM_CHANNEL       LEDC_CHANNEL_0
-#define SERVO_PWM_FREQ          50            
+#define SERVO_PWM_FREQ          50  
+#define SERVO_MIN_ANGLE         0
+#define SERVO_MAX_ANGLE         180
+#define SERVO_STEPS_COUNT       60
+#define SERVO_MIN_PWM_DUTY_US   500
+#define SERVO_MAX_PWM_DUTY_US   2500      
+#define SERVO_ANGLE_BY_STEP     (SERVO_MAX_ANGLE - SERVO_MIN_ANGLE) / SERVO_STEPS_COUNT
 
-void init_servo() 
-{
-    ledc_timer_config_t timer_conf = {
-        .speed_mode       = SERVO_PWM_MODE,
-        .duty_resolution  = LEDC_TIMER_12_BIT, 
-        .timer_num        = SERVO_PWM_TIMER,
-        .freq_hz          = SERVO_PWM_FREQ,
-        .clk_cfg          = LEDC_AUTO_CLK
-    };
-    ledc_timer_config(&timer_conf);
+#define ENCODER                 "ENCODER"
+#define ENCODER_CLK_GPIO        GPIO_NUM_17
+#define ENCODER_DT_GPIO         GPIO_NUM_15
 
-    ledc_channel_config_t channel_conf = {
-        .gpio_num         = SERVO_OUTPUT_IO,
-        .speed_mode       = SERVO_PWM_MODE,
-        .channel          = SERVO_PWM_CHANNEL,
-        .intr_type        = LEDC_INTR_DISABLE,
-        .timer_sel        = SERVO_PWM_TIMER,
-        .duty             = 0,
-        .hpoint           = 0
-    };
-    ledc_channel_config(&channel_conf);
-}
+#define BUZZER                  "BUZZER"
+#define BUZZER_NAME_SIZE        10
+#define BUZZER_PWM_TIMER        LEDC_TIMER_1
+#define BUZZER_PWM_MODE         LEDC_LOW_SPEED_MODE
+#define BUZZER_GPIO             GPIO_NUM_21
+#define BUZZER_PWM_CHANNEL      LEDC_CHANNEL_1
+#define BUZZER_PWM_DEFAULT_FREQ 50
+#define BUZZER_PWM_DEFAULT_DUTY 0
+#define MELODY_SIZE             10
 
-uint32_t angle_to_duty(int angle) 
-{
-    if (angle < 0) angle = 0;
-    if (angle > 180) angle = 180;
-    
-    uint32_t duty = 102 + ((angle * (512 - 102)) / 180);
-    return duty;
-}
+#define BUTTON                  "BUTTON"
+#define BUTTON_GPIO             GPIO_NUM_6
+
 
 extern "C" void app_main() 
 {
-    gpio_install_isr_service(0);
-    init_servo();
+    Encoder encoder(ENCODER_CLK_GPIO, ENCODER_DT_GPIO);
 
-    Encoder encoder(GPIO_NUM_17, GPIO_NUM_15);
-    int current_steps = 0;
+    PWM pwm_buzzer(BUZZER_GPIO, BUZZER_PWM_DEFAULT_FREQ, BUZZER_PWM_DEFAULT_DUTY 
+        ,BUZZER_PWM_TIMER, BUZZER_PWM_CHANNEL);
+    etl::vector<MelodyNote, MELODY_SIZE> stop_signal;
+    int volume = pwm_buzzer.getMaxDuty() / 2;
+    stop_signal.push_back(MelodyNote(Note::A5, 100, volume, 50));
+    stop_signal.push_back(MelodyNote(Note::A5, 100, volume, 50));
+    stop_signal.push_back(MelodyNote(Note::Ds4, 300, volume, 0));
+    Buzzer buzzer(BUZZER, pwm_buzzer, stop_signal);
 
-    ESP_LOGI("SERVO", "Система управления рулями активирована.");
+    PWM pwm_servo(SERVO_GPIO);
+    Servo servo(pwm_servo, SERVO_MIN_ANGLE, SERVO_MIN_PWM_DUTY_US, 
+        SERVO_MAX_ANGLE, SERVO_MAX_PWM_DUTY_US);
+
+    Button button(BUTTON, BUTTON_GPIO);
+
+    Driver driver(encoder, buzzer, button, servo, SERVO_ANGLE_BY_STEP);
+
+    etl::delegate<void()> cb_on = etl::delegate<void()>::create<Driver, &Driver::multiplyAnglebyStep>(driver);
+    etl::delegate<void()> cb_off = etl::delegate<void()>::create<Driver, &Driver::resetAngleByStepToDefault>(driver);
+
+    button.setOnToggleOn(cb_on);
+    button.setOnToggleOff(cb_off);
+
+    int previous_angle = 0;
 
     while (true)
     {
-        if (xQueueReceive(encoder.step_queue, &current_steps, portMAX_DELAY))
+        driver.update();
+        if (previous_angle != servo.getCurrentAngle())
         {
-            int target_angle = current_steps * 5;
-
-            if (target_angle < 0) target_angle = 0;
-            if (target_angle > 180) target_angle = 180;
-
-            uint32_t duty = angle_to_duty(target_angle);
-            ledc_set_duty(SERVO_PWM_MODE, SERVO_PWM_CHANNEL, duty);
-            ledc_update_duty(SERVO_PWM_MODE, SERVO_PWM_CHANNEL);
-
-            ESP_LOGI("SERVO", "Шаги: %d | Угол серво: %d град.", current_steps, target_angle);
+            previous_angle = servo.getCurrentAngle();
+            ESP_LOGI(SERVO, "Current servo angle: %d", previous_angle);
         }
+        
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+    

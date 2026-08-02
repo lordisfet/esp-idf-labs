@@ -23,8 +23,10 @@ private:
     ledc_intr_type_t _intr_type;
     ledc_mode_t _speed_mode;
     ledc_timer_bit_t _duty_res;
-    double _max_duty;
+    uint16_t _max_duty;
     ledc_clk_cfg_t _clk_cfg;
+
+    void updateDuty(uint32_t new_duty);
 public:
     PWM(uint8_t pin, uint32_t freq = DEFAULT_FREQUENCY, 
         uint32_t duty = DEFAULT_DUTY, ledc_timer_t timer_num = DEFAUL_TIMER_NUM, 
@@ -35,12 +37,11 @@ public:
         ledc_clk_cfg_t clk_cfg = LEDC_AUTO_CLK);
 
     uint32_t getPeriod() {return TO_US/_freq;}   
-    uint32_t getDutyInUs() {return (_duty/_max_duty) * getPeriod();} 
+    uint32_t getDutyInUs() {return ((double)_duty/_max_duty) * getPeriod();} 
+    uint16_t getMaxDuty() {return _max_duty;}
 
-    void updateFrequency(uint32_t new_freq);
-    void updateDuty(uint32_t new_duty);
+    void setFrequency(uint32_t new_freq);
+    esp_err_t setDutyAsUs(uint32_t us);
     void pause() {ledc_timer_pause(_speed_mode, _timer_num);}
     void resume() {ledc_timer_resume(_speed_mode, _timer_num);}
-
-    void setDutyAsUs(uint32_t ms);
 };

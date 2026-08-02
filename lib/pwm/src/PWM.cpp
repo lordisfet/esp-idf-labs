@@ -33,7 +33,7 @@ PWM::PWM(uint8_t pin, uint32_t freq, uint32_t duty,
     ESP_ERROR_CHECK(ledc_channel_config(&buzzer_channel_config));
 }
 
-void PWM::updateFrequency(uint32_t new_freq) {
+void PWM::setFrequency(uint32_t new_freq) {
     _freq = new_freq;
     ledc_set_freq(_speed_mode, _timer_num, _freq);
 }
@@ -44,13 +44,14 @@ void PWM::updateDuty(uint32_t new_duty) {
     ledc_update_duty(_speed_mode, _channel);
 }
 
-void PWM::setDutyAsUs(uint32_t us){
+esp_err_t PWM::setDutyAsUs(uint32_t us){
     if (us > getPeriod())
     {
-        ESP_LOGE("PWM", "duty in us is greater than pwm period, max us`s value is %lu", getPeriod());
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
     
     uint32_t new_duty = _max_duty * ((double)us / getPeriod());
     updateDuty(new_duty);
+
+    return ESP_OK;
 }
