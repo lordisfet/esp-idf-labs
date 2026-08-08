@@ -26,19 +26,14 @@ class Button
     unsigned long long _pinMask;
     int _debounceTime;
 
-    bool _isToggled;
-    etl::delegate<void()> _onToggleOn;
-    etl::delegate<void()> _onToggleOff;
+    etl::delegate<void()> _onClick;
 
     ButtonState _internalState;
-    ulong lastLevelSwitchTime;
-    int lastlevel;
+    ulong _lastLevelSwitchTime;
+    int _lastlevel;
 
     public:
-    void toggleOff() {_isToggled = false;}
-
-    void setOnToggleOn(etl::delegate<void()> cb) {_onToggleOn = cb;}
-    void setOnToggleOff(etl::delegate<void()> cb) {_onToggleOff = cb;}
+    void setOnClick(etl::delegate<void()> cb) {_onClick = cb;}
 
     Button(const char* TAG, 
            gpio_num_t pin, 
@@ -47,13 +42,12 @@ class Button
           _pin(pin),
           _pinMask(1ULL << pin),
           _debounceTime(debounceTime),
-          _isToggled(false),
           _internalState(IDLE),
-          lastLevelSwitchTime(0),
-          lastlevel(0)
+          _lastLevelSwitchTime(0),
+          _lastlevel(0)
     {
         // Читаем фактическое состояние пина
-        lastlevel = gpio_get_level(_pin);
+        _lastlevel = gpio_get_level(_pin);
 
         const gpio_config_t configButton =
         {
@@ -67,11 +61,6 @@ class Button
         ESP_ERROR_CHECK(gpio_config(&configButton));
     }
 
-    bool isPressed()
-    {
-        return _isToggled;
-    }
-
     esp_err_t update()
     {
         int currentLevel = gpio_get_level(_pin);
@@ -80,19 +69,19 @@ class Button
         switch (_internalState)
         {
         case IDLE:
-            if (currentLevel != lastlevel)
+            if (currentLevel != _lastlevel)
             {
-                lastLevelSwitchTime = currentTime;
+                _lastLevelSwitchTime = currentTime;
                 _internalState = DEBOUNCE;
             }
             break;
         case DEBOUNCE:
-            if (currentLevel == lastlevel)
+            if (currentLevel == _lastlevel)
             {
                 _internalState = IDLE;
-                lastLevelSwitchTime = currentTime;
+                _lastLevelSwitchTime = currentTime;
             }
-            if (currentTime - lastLevelSwitchTime >= _debounceTime && currentLevel != lastlevel)
+            if (currentTime - _lastLevelSwitchTime >= _debounceTime && currentLevel != _lastlevel)
             {
                 if (currentLevel == 0)
                 {
@@ -105,23 +94,16 @@ class Button
             }
             break;
         case PRESSED:
-            _isToggled = !_isToggled;
-            lastlevel = currentLevel;
-            _internalState = IDLE;
-            ESP_LOGI(_TAG, "Button state: %s", _isToggled ? "active" : "inactive");
-
-            if (_isToggled)
+            if (_onClick.is_valid()) 
             {
-                ESP_LOGI(_TAG, "IS TOGGLED ON");
-                if (_onToggleOn.is_valid()) {ESP_LOGI(_TAG, "DELEGATE IS VALID"); _onToggleOn();}
+                _onClick();
             }
-            else {
-                ESP_LOGI(_TAG, "IS TOGGLED OFF");
-                if (_onToggleOff.is_valid()) {ESP_LOGI(_TAG, "DELEGATE IS VALID"); _onToggleOff();}
-            }
+            _lastlevel = currentLevel;
+            _internalState = IDLE;
+            ESP_LOGI(_TAG, "Button clicked");
             break;
         case RELEASED:
-            lastlevel = currentLevel;
+            _lastlevel = currentLevel;
             _internalState = IDLE;
             break;
         default:

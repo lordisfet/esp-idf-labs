@@ -1,86 +1,77 @@
 #include <etl/vector.h>
-#include <Button.h>
 #include <etl/delegate.h>
 
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/ledc.h"
-#include "encoder/Encoder.h"
-#include "servo/Servo.h"
-#include "driver/Driver.h"
-#include "music_player/buzzer/Buzzer.h"
+#include "driver/uart.h"
 
-#define SERVO                   "SERVO"
-#define SERVO_PWM_TIMER         LEDC_TIMER_0
-#define SERVO_PWM_MODE          LEDC_LOW_SPEED_MODE
-#define SERVO_GPIO              GPIO_NUM_18
-#define SERVO_PWM_CHANNEL       LEDC_CHANNEL_0
-#define SERVO_PWM_FREQ          50  
-#define SERVO_MIN_ANGLE         0
-#define SERVO_MAX_ANGLE         180
-#define SERVO_STEPS_COUNT       60
-#define SERVO_MIN_PWM_DUTY_US   500
-#define SERVO_MAX_PWM_DUTY_US   2500      
-#define SERVO_ANGLE_BY_STEP     (SERVO_MAX_ANGLE - SERVO_MIN_ANGLE) / SERVO_STEPS_COUNT
+#include "Button.h"
+#include "protocol.h"
 
-#define ENCODER                 "ENCODER"
-#define ENCODER_CLK_GPIO        GPIO_NUM_17
-#define ENCODER_DT_GPIO         GPIO_NUM_15
+uint8_t uart_num = UART_NUM_1;
+constexpr char* BTN_TAG = "BTN_BOOT";
+constexpr gpio_num_t BTN_GPIO = GPIO_NUM_0;
+constexpr gpio_num_t LED_GPIO = GPIO_NUM_37;
+constexpr gpio_num_t TX_GPIO = GPIO_NUM_4;
+constexpr gpio_num_t RX_GPIO = GPIO_NUM_5;
+const uint rx_buffer_size = 128;
+// constexpr gpio_port_t BTN_PORT = GPIO_PORT_0;
 
-#define BUZZER                  "BUZZER"
-#define BUZZER_NAME_SIZE        10
-#define BUZZER_PWM_TIMER        LEDC_TIMER_1
-#define BUZZER_PWM_MODE         LEDC_LOW_SPEED_MODE
-#define BUZZER_GPIO             GPIO_NUM_21
-#define BUZZER_PWM_CHANNEL      LEDC_CHANNEL_1
-#define BUZZER_PWM_DEFAULT_FREQ 50
-#define BUZZER_PWM_DEFAULT_DUTY 0
-#define MELODY_SIZE             10
-
-#define BUTTON                  "BUTTON"
-#define BUTTON_GPIO             GPIO_NUM_6
-
+void sent_toggle_comand() {
+    uint8_t src = CMD_TOGGLE_LED;
+    uart_write_bytes(uart_num, &src, sizeof(src));
+}
 
 extern "C" void app_main() 
 {
-    Encoder encoder(ENCODER_CLK_GPIO, ENCODER_DT_GPIO);
+    Button btn_boot(BTN_TAG, BTN_GPIO);
+    btn_boot.setOnClick(etl::delegate<void()>::create<sent_toggle_comand>());
 
-    PWM pwm_buzzer(BUZZER_GPIO, BUZZER_PWM_DEFAULT_FREQ, BUZZER_PWM_DEFAULT_DUTY 
-        ,BUZZER_PWM_TIMER, BUZZER_PWM_CHANNEL);
-    etl::vector<MelodyNote, MELODY_SIZE> stop_signal;
-    int volume = pwm_buzzer.getMaxDuty() / 2;
-    stop_signal.push_back(MelodyNote(Note::A5, 100, volume, 50));
-    stop_signal.push_back(MelodyNote(Note::A5, 100, volume, 50));
-    stop_signal.push_back(MelodyNote(Note::Ds4, 300, volume, 0));
-    Buzzer buzzer(BUZZER, pwm_buzzer, stop_signal);
+    uart_config_t uart_cfg = {
+        .baud_rate = BAUD_RATE,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_APB
+    };
+    ESP_ERROR_CHECK(uart_param_config(uart_num, &uart_cfg));
+    ESP_ERROR_CHECK(uart_set_pin(uart_num, TX_GPIO, RX_GPIO, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+    constexpr int uart_buffer_size = (1024 * 2);
+    uint data[rx_buffer_size];
+    ESP_ERROR_CHECK(uart_driver_install(uart_num, uart_buffer_size, uart_buffer_size, 0, NULL, 0));
 
-    PWM pwm_servo(SERVO_GPIO);
-    Servo servo(pwm_servo, SERVO_MIN_ANGLE, SERVO_MIN_PWM_DUTY_US, 
-        SERVO_MAX_ANGLE, SERVO_MAX_PWM_DUTY_US);
-
-    Button button(BUTTON, BUTTON_GPIO);
-
-    Driver driver(encoder, buzzer, button, servo, SERVO_ANGLE_BY_STEP);
-
-    etl::delegate<void()> cb_on = etl::delegate<void()>::create<Driver, &Driver::multiplyAnglebyStep>(driver);
-    etl::delegate<void()> cb_off = etl::delegate<void()>::create<Driver, &Driver::resetAngleByStepToDefault>(driver);
-
-    button.setOnToggleOn(cb_on);
-    button.setOnToggleOff(cb_off);
-
-    int previous_angle = 0;
+    gpio_reset_pin(LED_GPIO);
+    gpio_config_t led_gpio_cfg = {
+        .pin_bit_mask = 1ULL << LED_GPIO,
+        .mode = GPIO_MODE_INPUT_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&led_gpio_cfg));
 
     while (true)
     {
-        driver.update();
-        if (previous_angle != servo.getCurrentAngle())
+        btn_boot.update();
+        if (uart_read_bytes(uart_num, data, rx_buffer_size, pdMS_TO_TICKS(10)) != 0)
         {
-            previous_angle = servo.getCurrentAngle();
-            ESP_LOGI(SERVO, "Current servo angle: %d", previous_angle);
+            if (gpio_get_level(LED_GPIO) == 0)
+            {
+                gpio_set_level(LED_GPIO, 1);
+            }
+            else 
+            {
+                gpio_set_level(LED_GPIO, 0);
+            }
         }
         
+        // vTaskDelay(pdMS_TO_TICKS(200));
+        // length = uart_read_bytes(uart_num, data, max_len, pdMS_TO_TICKS(10));
+        // data[length] = '\0';
+        // ESP_LOGI("RX_DATA", "recieved string: %s", (const char*)data);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
-    
