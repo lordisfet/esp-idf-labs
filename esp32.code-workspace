@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "esp32"
+		},
+		{
+			"path": "stm32"
+		},
+		{
+			"path": "shared"
+		}
+	],
+	"settings": {}
+}
