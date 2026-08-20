@@ -20,6 +20,29 @@ RTCDateTimeRegistgred RTC::encode_to_hardware(RTCDateTime time) {
     encoded_time.seconds.bits.tens_seconds = time.seconds / 10;
     encoded_time.seconds.bits.units_seconds = time.seconds % 10;
     encoded_time.seconds.bits.clock_halt = 0;
+
+    encoded_time.minutes.bits.tens_minutes = time.minutes / 10;
+    encoded_time.minutes.bits.units_minutes = time.minutes % 10;
+    encoded_time.minutes.bits.reserved = 0;
+
+    encoded_time.hours.bits.mode_12_24 = false;
+    encoded_time.hours.bits.tens_hours = time.hours / 10;
+    encoded_time.hours.bits.units_hours = time.hours % 10;
+    encoded_time.hours.bits.reserved = 0;
+
+    encoded_time.dotw.bits.day = time.dotw;
+    encoded_time.dotw.bits.reserved = 0;
+    
+    encoded_time.day.bits.tens_day = time.day / 10;
+    encoded_time.day.bits.units_day = time.day % 10;
+    encoded_time.day.bits.reserved = 0;
+
+    encoded_time.month.bits.tens_month = time.month / 10;
+    encoded_time.month.bits.units_month = time.month % 10;
+    encoded_time.month.bits.reserved = 0;
+
+    encoded_time.year.bits.tens_year = time.year / 10;
+    encoded_time.year.bits.units_year = time.year % 10;
     
     return encoded_time;
 }
@@ -43,7 +66,7 @@ RTCDateTime RTC::get_setup_time() {
     char month_str[4];
     int year_full, day, hour, min, sec;
     
-    sscanf(__DATE__, "%3s %d %d", &month_str, &day, &year_full);
+    sscanf(__DATE__, "%3s %d %d", month_str, &day, &year_full);
     sscanf(__TIME__, "%d:%d:%d", &hour, &min, &sec);
 
     now.seconds = sec;
