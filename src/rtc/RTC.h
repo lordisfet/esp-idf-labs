@@ -31,29 +31,37 @@ class RTC
 private:
     i2c_port_t _port;
     const uint8_t _address = 0x68;
-    static const RTCDateTime _setup_time;
+
+    static const RTCDateTime SETUP_TIME;
+    static constexpr uint16_t WAIT_TIME = 1000;
 
     RTCDateTime get_setup_time();
-    RTCDateTime decode_from_hardware(RTCDateTimeRegistred);
+    RTCDateTime decode_from_hardware(RTCDateTimeRegistred time);
     RTCDateTimeRegistred encode_to_hardware(RTCDateTime time); 
     uint8_t calculate_day_of_week(uint16_t year, uint8_t month, uint8_t day);
+
+    void write_data(RTCDateTimeRegistred time);
+    RTCDateTimeRegistred read_data();
+
+    void set_time(RTCDateTime time);
+    RTCDateTime get_time();
     
 public:
     RTC(i2c_port_t port) : _port(port) {
-        get_setup_time();
+        
     };
 
-    //TODO: add setup_time in build
-    void set_time_now() {
-        
-        i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (_address << 1) | 0x7F, true);
-
+    //TODO: add SETUP_TIME in build
+    void set_time(RTCDateTime time) {
+        RTCDateTimeRegistred raw_time = encode_to_hardware(time);
+        write_data(raw_time);
     }
 
-    //TODO: send to I2C bus
+    RTCDateTime get_time() {
+        RTCDateTimeRegistred raw_time = read_data();
+        return decode_from_hardware(raw_time);
+    }
+
     //TODO: render info, send data to OLED-display
 };
 
