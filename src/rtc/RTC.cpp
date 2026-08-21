@@ -85,19 +85,21 @@ RTCDateTime RTC::get_setup_time() {
     return now;
 }
 
- void RTC::write_data(RTCDateTimeRegistred data) {
-    // RTCDateTimeRegistred data_registred = encode_to_hardware(data);
+ void RTC::write_data(RTCDateTimeRegistred time) {
+    // RTCDateTimeRegistred data_registred = encode_to_hardware(time);
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    uint8_t reg_addr = 0x00;
 
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (_address << 1) | 0x7F, true);
-    i2c_master_write_byte(cmd, data.seconds.raw, true);
-    i2c_master_write_byte(cmd, data.minutes.raw, true);
-    i2c_master_write_byte(cmd, data.hours.raw, true);
-    i2c_master_write_byte(cmd, data.dotw.raw, true);
-    i2c_master_write_byte(cmd, data.day.raw, true);
-    i2c_master_write_byte(cmd, data.month.raw, true);
-    i2c_master_write_byte(cmd, data.year.raw, true);
+    i2c_master_write_byte(cmd, (_address << 1) | I2C_MASTER_WRITE, true);
+    i2c_master_write_byte(cmd, reg_addr, true);
+    i2c_master_write_byte(cmd, time.seconds.raw, true);
+    i2c_master_write_byte(cmd, time.minutes.raw, true);
+    i2c_master_write_byte(cmd, time.hours.raw, true);
+    i2c_master_write_byte(cmd, time.dotw.raw, true);
+    i2c_master_write_byte(cmd, time.day.raw, true);
+    i2c_master_write_byte(cmd, time.month.raw, true);
+    i2c_master_write_byte(cmd, time.year.raw, true);
     i2c_master_stop(cmd);
 
     i2c_master_cmd_begin(_port, cmd, pdMS_TO_TICKS(WAIT_TIME));
@@ -105,10 +107,8 @@ RTCDateTime RTC::get_setup_time() {
 }
 
 RTCDateTimeRegistred RTC::read_data() {
-    // uint8_t buffer[sizeof(RTCDateTimeRegistred)];
     RTCDateTimeRegistred raw_data = {};
     uint8_t reg_addr = 0x00;
-    // i2c_master_read_from_device(_port, _address, buffer, sizeof(RTCDateTimeRegistred), pdMS_TO_TICKS(WAIT_TIME));
 
     esp_err_t err = i2c_master_write_read_device(_port, _address, &reg_addr, 1, 
         (uint8_t*)&raw_data, sizeof(RTCDateTimeRegistred), pdMS_TO_TICKS(WAIT_TIME));
@@ -119,4 +119,13 @@ RTCDateTimeRegistred RTC::read_data() {
     }
 
     return raw_data;
+}
+
+void RTC::set_time(RTCDateTime time) {
+    RTCDateTimeRegistred raw_time = encode_to_hardware(time);
+    write_data(raw_time);
+}
+RTCDateTime RTC::get_time() {
+    RTCDateTimeRegistred raw_time = read_data();
+    return decode_from_hardware(raw_time);
 }

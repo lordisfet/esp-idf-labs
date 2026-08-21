@@ -29,16 +29,17 @@ struct RTCDateTimeRegistred {
 class RTC
 {
 private:
-    i2c_port_t _port;
+    const i2c_port_t _port;
     const uint8_t _address = 0x68;
 
     static const RTCDateTime SETUP_TIME;
     static constexpr uint16_t WAIT_TIME = 1000;
 
     RTCDateTime get_setup_time();
+    uint8_t calculate_day_of_week(uint16_t year, uint8_t month, uint8_t day);
+
     RTCDateTime decode_from_hardware(RTCDateTimeRegistred time);
     RTCDateTimeRegistred encode_to_hardware(RTCDateTime time); 
-    uint8_t calculate_day_of_week(uint16_t year, uint8_t month, uint8_t day);
 
     void write_data(RTCDateTimeRegistred time);
     RTCDateTimeRegistred read_data();
@@ -47,21 +48,11 @@ private:
     RTCDateTime get_time();
     
 public:
-    RTC(i2c_port_t port) : _port(port) {
-        
-    };
+    RTC(i2c_port_t port, uint8_t address) : _port(port), _address(address) {};
 
-    //TODO: add SETUP_TIME in build
-    void set_time(RTCDateTime time) {
-        RTCDateTimeRegistred raw_time = encode_to_hardware(time);
-        write_data(raw_time);
-    }
-
-    RTCDateTime get_time() {
-        RTCDateTimeRegistred raw_time = read_data();
-        return decode_from_hardware(raw_time);
+    void init() {
+        set_time(get_setup_time());
     }
 
     //TODO: render info, send data to OLED-display
 };
-
