@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include "driver/i2c.h"
 #include "etl/string.h"
@@ -53,6 +55,4 @@ public:
     void init() {
         set_time(get_setup_time());
     }
-
-    //TODO: render info, send data to OLED-display
 };
