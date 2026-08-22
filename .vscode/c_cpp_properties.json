@@ -151,7 +151,7 @@
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/ulp/ulp_common/include/esp32s3",
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/usb/include",
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/wifi_provisioning/include",
-                "C:/Users/Max/Projects/emb-dev/shared",
+                "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src/modules",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/button/src",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/pwm/src",
                 ""
@@ -302,7 +302,7 @@
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/ulp/ulp_common/include/esp32s3",
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/usb/include",
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/wifi_provisioning/include",
-                    "C:/Users/Max/Projects/emb-dev/shared",
+                    "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src/modules",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/button/src",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/pwm/src",
                     ""

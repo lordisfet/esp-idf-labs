@@ -31,8 +31,8 @@ struct RTCDateTimeRegistred {
 class RTC
 {
 private:
-    const i2c_port_t _port;
-    const uint8_t _address;
+    const i2c_port_t _PORT;
+    const uint8_t _ADDRESS;
 
     static const RTCDateTime SETUP_TIME;
     static constexpr uint16_t WAIT_TIME = 1000;
@@ -46,7 +46,7 @@ private:
     void write_data(RTCDateTimeRegistred time);
     RTCDateTimeRegistred read_data();
 public:
-    RTC(i2c_port_t port = I2C_NUM_0, uint8_t address = 0x68) : _port(port), _address(address) {};
+    RTC(i2c_port_t port = I2C_NUM_0, uint8_t address = 0x68) : _PORT(port), _ADDRESS(address) {};
 
     void init() { set_time(get_setup_time()); }
     

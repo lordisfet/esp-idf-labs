@@ -91,7 +91,7 @@ RTCDateTime RTC::get_setup_time() {
     uint8_t reg_addr = 0x00;
 
     i2c_master_start(cmd);
-    i2c_master_write_byte(cmd, (_address << 1) | I2C_MASTER_WRITE, true);
+    i2c_master_write_byte(cmd, (_ADDRESS << 1) | I2C_MASTER_WRITE, true);
     i2c_master_write_byte(cmd, reg_addr, true);
     i2c_master_write_byte(cmd, time.seconds.raw, true);
     i2c_master_write_byte(cmd, time.minutes.raw, true);
@@ -102,7 +102,7 @@ RTCDateTime RTC::get_setup_time() {
     i2c_master_write_byte(cmd, time.year.raw, true);
     i2c_master_stop(cmd);
 
-    i2c_master_cmd_begin(_port, cmd, pdMS_TO_TICKS(WAIT_TIME));
+    i2c_master_cmd_begin(_PORT, cmd, pdMS_TO_TICKS(WAIT_TIME));
     i2c_cmd_link_delete(cmd);
 }
 
@@ -110,7 +110,7 @@ RTCDateTimeRegistred RTC::read_data() {
     RTCDateTimeRegistred raw = {};
     uint8_t reg_addr = 0x00;
 
-    esp_err_t err = i2c_master_write_read_device(_port, _address, &reg_addr, 1, 
+    esp_err_t err = i2c_master_write_read_device(_PORT, _ADDRESS, &reg_addr, 1, 
         (uint8_t*)&raw, sizeof(RTCDateTimeRegistred), pdMS_TO_TICKS(WAIT_TIME));
 
     if (err != ESP_OK)
