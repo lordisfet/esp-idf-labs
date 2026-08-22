@@ -62,5 +62,5 @@ union YearRegister {
     struct {
         uint8_t units_year  : 4;
         uint8_t tens_year   : 4;
-    } year;
+    } bits;
 };

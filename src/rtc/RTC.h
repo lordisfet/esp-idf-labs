@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include "driver/i2c.h"
 #include "etl/string.h"
@@ -23,37 +25,31 @@ struct RTCDateTimeRegistred {
     DateRegister    day;
     MonthRegister   month;
     YearRegister    year;
-} _raw_data;
+};
 #pragma pack(pop)
 
 class RTC
 {
 private:
-    i2c_port_t _port;
-    const uint8_t _address = 0x68;
-    static const RTCDateTime _setup_time;
+    const i2c_port_t _port;
+    const uint8_t _address;
+
+    static const RTCDateTime SETUP_TIME;
+    static constexpr uint16_t WAIT_TIME = 1000;
 
     RTCDateTime get_setup_time();
-    RTCDateTime decode_from_hardware(RTCDateTimeRegistred);
-    RTCDateTimeRegistred encode_to_hardware(RTCDateTime time); 
     uint8_t calculate_day_of_week(uint16_t year, uint8_t month, uint8_t day);
-    
+
+    RTCDateTime decode_from_hardware(RTCDateTimeRegistred time);
+    RTCDateTimeRegistred encode_to_hardware(RTCDateTime time); 
+
+    void write_data(RTCDateTimeRegistred time);
+    RTCDateTimeRegistred read_data();
 public:
-    RTC(i2c_port_t port) : _port(port) {
-        get_setup_time();
-    };
+    RTC(i2c_port_t port = I2C_NUM_0, uint8_t address = 0x68) : _port(port), _address(address) {};
 
-    //TODO: add setup_time in build
-    void set_time_now() {
-        
-        i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-
-        i2c_master_start(cmd);
-        i2c_master_write_byte(cmd, (_address << 1) | 0x7F, true);
-
-    }
-
-    //TODO: send to I2C bus
-    //TODO: render info, send data to OLED-display
+    void init() { set_time(get_setup_time()); }
+    
+    void set_time(RTCDateTime time);
+    RTCDateTime get_time();
 };
-
