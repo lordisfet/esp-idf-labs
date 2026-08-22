@@ -107,18 +107,18 @@ RTCDateTime RTC::get_setup_time() {
 }
 
 RTCDateTimeRegistred RTC::read_data() {
-    RTCDateTimeRegistred raw_data = {};
+    RTCDateTimeRegistred raw = {};
     uint8_t reg_addr = 0x00;
 
     esp_err_t err = i2c_master_write_read_device(_port, _address, &reg_addr, 1, 
-        (uint8_t*)&raw_data, sizeof(RTCDateTimeRegistred), pdMS_TO_TICKS(WAIT_TIME));
+        (uint8_t*)&raw, sizeof(RTCDateTimeRegistred), pdMS_TO_TICKS(WAIT_TIME));
 
     if (err != ESP_OK)
     {
         return RTCDateTimeRegistred{};
     }
 
-    return raw_data;
+    return raw;
 }
 
 void RTC::set_time(RTCDateTime time) {

@@ -2,13 +2,14 @@
 #include "driver/i2c.h"
 #include "esp_err.h"
 #include "esp_log.h"
+#include "esp_rom_sys.h"
 
 #include <u8g2.h>
 #include <u8x8.h>
 
-#include "esp_rom_sys.h"
+#include "menu/Menu.h"
 
-#define TASK_DELAY_MILIS 30
+#define TASK_DELAY_TICKS pdMS_TO_TICKS(1000)
 #define SDA_PIN GPIO_NUM_15
 #define SCL_PIN GPIO_NUM_2
 #define I2C_PORT I2C_NUM_0 
@@ -106,29 +107,29 @@ uint8_t gpio_and_delay(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr
 
 extern "C" void app_main(void)
 {
-    u8g2_t display;
-
     i2c_master_init();
-    u8g2_Setup_ssd1306_i2c_128x64_noname_f(&display, U8G2_R0, write_byte, gpio_and_delay);  // init u8g2 structure
-    u8g2_InitDisplay(&display); // send init sequence to the display, display is in sleep mode after this,
-    u8g2_SetPowerSave(&display, 0); // wake up display
 
-    uint8_t start_height_point = 20;
-    // uint8_t start_wigth_point = 0;
+    u8g2_t u8g2;
+    u8g2_Setup_ssd1306_i2c_128x64_noname_f(&u8g2, U8G2_R0, write_byte, gpio_and_delay);  // init u8g2 structure
+    u8g2_InitDisplay(&u8g2); // send init sequence to the display, display is in sleep mode after this,
+    u8g2_SetPowerSave(&u8g2, 0); // wake up u8g2
 
-    u8g2_SetFont(&display, u8g2_font_ncenB14_tr); // Выбираем шрифт
+    RTC rtc;
+    rtc.init();
+
+    Display display(u8g2);
+    ScreenLayout layout = {
+        .time = {10, 35, u8g2_font_logisoso24_tn},
+        .dotw = {20,  55, u8g2_font_profont12_tf},
+        .date = {50, 55, u8g2_font_profont12_tf}
+    };
+    Menu menu(layout);
+    
     while (true)
     {
-        u8g2_ClearBuffer(&display); // Очищаем внутреннюю память
-        u8g2_DrawStr(&display, 0, start_height_point, "Hello, World"); // Пишем текст
-        u8g2_SendBuffer(&display); // Отправляем всё это физически на экран
-        if (start_height_point < SSD1306_HEIGHT + 14 + 2)
-        {
-            start_height_point++;
-        }
-        else {
-            start_height_point = 0;
-        }
-        vTaskDelay(pdMS_TO_TICKS(TASK_DELAY_MILIS));
+        RTCDateTime now = rtc.get_time(); 
+        menu.render(display, now);
+        ESP_LOGI("RTC", "Current time is %02d:%02d:%02d", now.hours, now.minutes, now.seconds);
+        vTaskDelay(TASK_DELAY_TICKS);
     }
 }
