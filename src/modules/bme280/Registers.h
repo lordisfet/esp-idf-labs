@@ -4,6 +4,7 @@
 
 #pragma pack(push, 1)
 
+#define REG_ID    0x60
 #define REG_RESET 0xE0
 #define CMD_RESET 0x00
 

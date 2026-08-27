@@ -1,6 +1,5 @@
 #include "I2CBus.h"
 
-
 I2CBus::I2CBus(i2c_port_t port, i2c_mode_t mode, uint8_t sda, uint8_t scl, uint32_t clk_speed) 
 : _PORT(port), _MODE(mode), _SDA_PIN(sda), _SCL_PIN(scl), _clk_speed(clk_speed) {
     i2c_config_t conf = {};
@@ -15,6 +14,7 @@ I2CBus::I2CBus(i2c_port_t port, i2c_mode_t mode, uint8_t sda, uint8_t scl, uint3
     i2c_param_config(_PORT, &conf);
     i2c_driver_install(_PORT, _MODE, 0, 0, 0);
 }
+
 void I2CBus::scan() {
     ESP_LOGI("I2C_SCAN", "Starting I2C bus scan...");
 
@@ -41,4 +41,15 @@ void I2CBus::scan() {
     } else {
         ESP_LOGI("I2C_SCAN", "Scan complete. Total devices: %d", devices_found);
     }
+}
+
+uint8_t I2CBus::read_bytes(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data, size_t length, uint32_t wait_time_ms) {
+    esp_err_t err = i2c_master_write_read_device(_PORT, dev_addr, 
+        &reg_addr, 1, data, length, pdMS_TO_TICKS(wait_time_ms));
+    return err == ESP_OK;
+}
+
+uint8_t I2CBus::write_bytes(uint8_t dev_addr, uint8_t* data, size_t length, uint32_t wait_time_ms) {
+    esp_err_t err = i2c_master_write_to_device(_PORT, dev_addr, data, length, pdMS_TO_TICKS(wait_time_ms));
+    return err == ESP_OK;
 }

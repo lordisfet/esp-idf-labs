@@ -20,4 +20,6 @@ public:
         uint32_t clk_speed = CLK_SPEED_DEFAUL);
         
     void scan();
+    uint8_t read_bytes(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data, size_t length, uint32_t wait_time_ms);
+    uint8_t write_bytes(uint8_t dev_addr, uint8_t* data, size_t length, uint32_t wait_time_ms);
 };

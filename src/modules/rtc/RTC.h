@@ -4,7 +4,7 @@
 #include "driver/i2c.h"
 #include "etl/string.h"
 
-#include "registers.h"
+#include "Registers.h"
 
 struct RTCDateTime {
     uint8_t seconds;
@@ -15,18 +15,6 @@ struct RTCDateTime {
     uint8_t month;
     uint8_t year;
 };
-
-#pragma pack(push, 1)
-struct RTCDateTimeRegistred {
-    SecondsRegister seconds;
-    MinutesRegister minutes;
-    HoursRegister   hours;
-    DaysRegister    dotw;
-    DateRegister    day;
-    MonthRegister   month;
-    YearRegister    year;
-};
-#pragma pack(pop)
 
 class RTC
 {
@@ -40,13 +28,13 @@ private:
     RTCDateTime get_setup_time();
     uint8_t calculate_day_of_week(uint16_t year, uint8_t month, uint8_t day);
 
-    RTCDateTime decode_from_hardware(RTCDateTimeRegistred time);
-    RTCDateTimeRegistred encode_to_hardware(RTCDateTime time); 
+    void write_data(RTCDateTImeRaw time);
+    RTCDateTImeRaw read_data();
 
-    void write_data(RTCDateTimeRegistred time);
-    RTCDateTimeRegistred read_data();
+    RTCDateTime decode_from_hardware(RTCDateTImeRaw time);
+    RTCDateTImeRaw encode_to_hardware(RTCDateTime time); 
 public:
-    RTC(i2c_port_t port = I2C_NUM_0, uint8_t address = 0x68) : _PORT(port), _ADDRESS(address) {};
+    RTC(i2c_port_t port, uint8_t address) : _PORT(port), _ADDRESS(address) {};
 
     void init() { set_time(get_setup_time()); }
     

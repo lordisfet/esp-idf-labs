@@ -66,7 +66,7 @@ union YearRegister {
 };
 
 #pragma pack(push, 1)
-struct RTCDateTimeRegistred {
+struct RTCDateTImeRaw {
     SecondsRegister seconds;
     MinutesRegister minutes;
     HoursRegister   hours;
