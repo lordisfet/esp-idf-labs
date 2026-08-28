@@ -43,9 +43,10 @@ extern "C" void app_main(void)
     Display display;
 
     ScreenLayout layout = {
-        .time = {10, 35, u8g2_font_logisoso24_tn},
-        .dotw = {20,  55, u8g2_font_profont12_tf},
-        .date = {50, 55, u8g2_font_profont12_tf}
+        .dotw = {20, 15, u8g2_font_profont12_tf},
+        .date = {50, 15, u8g2_font_profont12_tf},
+        .time = {10, 46, u8g2_font_logisoso24_tn},
+        .telemetry = {4, 60, u8g2_font_profont10_tf}
     };
     Menu menu(layout);
     
@@ -54,12 +55,12 @@ extern "C" void app_main(void)
         RTCDateTime now = rtc.get_time(); 
         bme280_data telemetry = bme.get_telemetry();
 
-        menu.render(display, now);
-
         ESP_LOGI("SYSTEM" , "-----------------------");
         ESP_LOGI("RTC", "Current time is %02d:%02d:%02d", now.hours, now.minutes, now.seconds);
         ESP_LOGI("BME280", "Current telemtry are: temperature = %f, humidity = %f, pressure = %f", 
             telemetry.temperature, telemetry.humidity, telemetry.pressure);
+            
+        menu.render(display, now, telemetry);
         
         vTaskDelay(TASK_DELAY_TICKS);
     }

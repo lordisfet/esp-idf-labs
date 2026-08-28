@@ -7,12 +7,6 @@
 #include "bme280.h"
 #include "bme280_defs.h"
 
-struct BME280Data {
-    float temperature;
-    float pressure;
-    float humidity; 
-};
-
 class BME280
 {
 private:
@@ -21,7 +15,6 @@ private:
     const uint8_t _ADDRESS;
     bme280_dev _dev;
     bme280_settings _sett;
-
 
     static BME280_INTF_RET_TYPE read_cb(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *intf_ptr);
     static BME280_INTF_RET_TYPE write_cb(uint8_t reg_addr, const uint8_t *reg_data, uint32_t len, void *intf_ptr);
