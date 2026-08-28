@@ -64,3 +64,15 @@ union YearRegister {
         uint8_t tens_year   : 4;
     } bits;
 };
+
+#pragma pack(push, 1)
+struct RTCDateTImeRaw {
+    SecondsRegister seconds;
+    MinutesRegister minutes;
+    HoursRegister   hours;
+    DaysRegister    dotw;
+    DateRegister    day;
+    MonthRegister   month;
+    YearRegister    year;
+};
+#pragma pack(pop)

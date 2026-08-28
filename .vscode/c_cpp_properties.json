@@ -11,6 +11,7 @@
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/include",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/u8g2",
+                "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/BME280_SensorAPI",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/Embedded Template Library/include",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/Embedded Template Library",
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/xtensa/include",
@@ -151,7 +152,7 @@
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/ulp/ulp_common/include/esp32s3",
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/usb/include",
                 "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/wifi_provisioning/include",
-                "C:/Users/Max/Projects/emb-dev/shared",
+                "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src/modules",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/button/src",
                 "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/pwm/src",
                 ""
@@ -162,6 +163,7 @@
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/include",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/u8g2",
+                    "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/BME280_SensorAPI",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/Embedded Template Library/include",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/.pio/libdeps/esp32-s3-devkitc-1/Embedded Template Library",
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/xtensa/include",
@@ -302,7 +304,7 @@
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/ulp/ulp_common/include/esp32s3",
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/usb/include",
                     "C:/Users/Max/.platformio/packages/framework-espidf@3.50102.240122/components/wifi_provisioning/include",
-                    "C:/Users/Max/Projects/emb-dev/shared",
+                    "C:/Users/Max/Projects/emb-dev/esp-idf-labs/src/modules",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/button/src",
                     "C:/Users/Max/Projects/emb-dev/esp-idf-labs/lib/pwm/src",
                     ""
